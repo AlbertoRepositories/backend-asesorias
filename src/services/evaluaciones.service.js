@@ -1,5 +1,5 @@
 import Evaluacion from '../models/Evaluacion.js';
-//import Inscripcion from '../models/Inscripcion.js'; DESCOMENTAR CUANDO ESTÉ HECHO EL MODELO DE INSCRIPCIÓN
+import Inscripcion from '../models/Inscripcion.js';
 
 // Crear evaluación
 export const crearEvaluacion = async (data) => {
@@ -13,11 +13,10 @@ export const getEvaluacionesByAsesor = async (asesorId) => {
 };
 
 // Validar si el usuario está inscrito en la asesoría
-/* DESCOMENTAR CUANDO ESTÉ HECHO EL MODELO DE DESCRIPCIÓN
 export const usuarioInscrito = async (userId, asesoriaId) => {
   return await Inscripcion.findOne({
     usuarioId: userId,
     asesoriaId: asesoriaId,
-    estado_inscripcion: 'activa'
+    estado: 'activa'
   });
-}; */
+};
