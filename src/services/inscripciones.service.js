@@ -1,6 +1,6 @@
 import Inscripcion from '../models/Inscripcion.js';
-// importación del modelo Asesoría para verificar el cupo
 import Asesoria from '../models/Asesoria.js'; 
+import * as notificacionService from './notificaciones.service.js';
 
 // función para inscribir a un usuario en una asesoría
 export const inscribirUsuario = async (usuarioId, asesoriaId) => {
@@ -14,7 +14,7 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
   // se cuenta cuántos asesorados están inscritos y activos en la asesoría
   const inscritosActuales = await Inscripcion.countDocuments({ 
     asesoriaId, 
-    estado_inscripcion: 'activa' 
+    estado: 'activa' 
   });
 
   // validación de si hay cupos (comparación de inscritos con el cupo máximo de la asesoría)
@@ -26,8 +26,16 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
   const nuevaInscripcion = new Inscripcion({
     usuarioId,
     asesoriaId,
-    estado_inscripcion: 'activa'
+    estado: 'activa'
   });
+
+  // se crea la notificación de inscripción exitosa y se envía al asesorado correspondiente
+  await notificacionService.crearNotificacion(
+    usuarioId,
+    '¡Te has inscrito a una asesoría!',
+    `Te has inscrito exitosamente a la asesoría de "${asesoria.titulo}". ¡No olvides asistir en la fecha indicada!`,
+    `/asesoria/${asesoriaId}`
+  );
 
   // se guarda en la DB y se devuelve el resultado
   return await nuevaInscripcion.save();
@@ -36,15 +44,26 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
 // función para obtener todas las inscripciones de un asesorado
 export const getInscripcionesPorAsesorado = async (usuarioId) => {
   // se devuelven las inscripciones (uso de "populate" para obtener también los detalles de la asesoría)
-  return await Inscripcion.find({ usuarioId, estado_inscripcion: 'activa' })
-    .populate('asesoriaId');
+  return await Inscripcion.find({ usuarioId, estado: 'activa' }).populate('asesoriaId');
 };
 
 // función para cancelar una inscripción (cambia el estado a inactiva)
 export const cancelarInscripcion = async (inscripcionId) => {
-  return await Inscripcion.findByIdAndUpdate(
+  const inscripcion = await Inscripcion.findByIdAndUpdate(
     inscripcionId, 
-    { estado_inscripcion: 'inactiva' },
+    { estado: 'inactiva' },
     { new: true } // devuelve el documento actualizado
-  );
+  ).populate('asesoriaId'); // "populate" para saber el nombre de la clase
+
+  // se crea la notificación de desinscripción de asesoría y se envía al asesorado correspondiente
+  if (inscripcion) {
+    await notificacionService.crearNotificacion(
+      inscripcion.usuarioId,
+      '¡Te has desinscrito de una asesoría!',
+      `Has cancelado tu inscripción a "${inscripcion.asesoriaId.titulo}" exitosamente. Recuerda que aún podrás reinscribirte mientras exista cupo y estés dentro de la fecha límite.`,
+      '/mis-asesorias'
+    );
+  }
+
+  return inscripcion; // devuelve la inscripción actualizada
 };

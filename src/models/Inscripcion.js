@@ -14,12 +14,12 @@ const inscripcionSchema = new mongoose.Schema({
     required: true
   },
   // fecha y hora del registro de la inscripción
-  fecha_inscripcion: {
+  fechaRegistro: {
     type: Date,
     default: Date.now
   },
   // estado: activa o inactiva (en caso de cancelarla)
-  estado_inscripcion: {
+  estado: {
     type: String,
     enum: ['activa', 'inactiva'],
     default: 'activa'

@@ -5,7 +5,7 @@ export const crearNotificacion = async (usuarioId, titulo, mensaje, enlace) => {
   const notificacion = new Notificacion({
     usuarioId,
     titulo,
-    descripcion_notificacion: mensaje,
+    descripcion: mensaje,
     enlace,
     leido: false // las notificaciones se crean como no leídas
   });
@@ -16,7 +16,7 @@ export const crearNotificacion = async (usuarioId, titulo, mensaje, enlace) => {
 // función para que se devuelva la lista de notificaciones del usuario
 export const getNotificacionesPorUsuario = async (usuarioId) => {
   // se devuelven las notificaciones del usuario ordenadas de más reciente a más antigua
-  return await Notificacion.find({ usuarioId }).sort({ fecha_creacion: -1 });
+  return await Notificacion.find({ usuarioId }).sort({ fechaCreacion: -1 });
 };
 
 // función para marcar una notificación como leída cuando el usuario la abre

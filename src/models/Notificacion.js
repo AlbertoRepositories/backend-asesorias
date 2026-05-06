@@ -13,7 +13,7 @@ const notificacionSchema = new mongoose.Schema({
     required: true
   },
   // detalles de la notificación
-  descripcion_notificacion: {
+  descripcion: {
     type: String,
     required: true
   },
@@ -28,7 +28,7 @@ const notificacionSchema = new mongoose.Schema({
     required: true
   },
   // Fecha de creación
-  fecha_creacion: {
+  fechaCreacion: {
     type: Date,
     default: Date.now
   }

@@ -17,6 +17,6 @@ export const usuarioInscrito = async (userId, asesoriaId) => {
   return await Inscripcion.findOne({
     usuarioId: userId,
     asesoriaId: asesoriaId,
-    estado_inscripcion: 'activa'
+    estado: 'activa'
   });
 };
