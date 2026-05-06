@@ -11,6 +11,8 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import testRoutes from './routes/test.routes.js';
 import evaluacionesRoutes from './routes/evaluaciones.routes.js';
+import inscripcionesRoutes from './routes/inscripciones.routes.js';
+import notificacionesRoutes from './routes/notificaciones.routes.js';
 
 // Importa middleware global de errores
 import { errorHandler } from './middlewares/error.middleware.js';
@@ -32,6 +34,8 @@ app.use(express.json());
 app.use('/api/test', testRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/evaluaciones', evaluacionesRoutes);
+app.use('/api/inscripciones', inscripcionesRoutes);
+app.use('/api/notificaciones', notificacionesRoutes);
 
 
 // =========================
