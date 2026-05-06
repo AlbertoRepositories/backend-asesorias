@@ -1,40 +1,68 @@
 // Importa Express para crear el servidor HTTP
 import express from 'express';
 
-// Importa Mongoose para conectarse a MongoDB
-import mongoose from 'mongoose';
-
-// Importa dotenv para leer variables de entorno (.env)
+// Importa dotenv para variables de entorno
 import dotenv from 'dotenv';
 
-// Importa rutas de autenticación
-import authRoutes from './routes/auth.routes.js';
+// Importa conexión a base de datos (modular)
+import { connectDB } from './config/db.js';
 
-// Carga variables del archivo .env
+// Importa rutas
+import authRoutes from './routes/auth.routes.js';
+import testRoutes from './routes/test.routes.js';
+import evaluacionesRoutes from './routes/evaluaciones.routes.js';
+
+// Importa middleware global de errores
+import { errorHandler } from './middlewares/error.middleware.js';
+
+// Carga variables del .env
 dotenv.config();
 
-// Crea la app de Express
+// Crea la app
 const app = express();
 
-// Middleware para poder leer JSON en el body de las requests
+// Middleware para leer JSON
 app.use(express.json());
 
-// Conexión a MongoDB usando la URI del .env
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Mongo conectado')) // Si conecta bien
-  .catch(err => console.log(err)); // Si hay error
 
-// Ruta de prueba (para saber si el server vive)
+// =========================
+// RUTAS
+// =========================
+
+app.use('/api/test', testRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/evaluaciones', evaluacionesRoutes);
+
+
+// =========================
+// RUTA BASE
+// =========================
+
 app.get('/', (req, res) => {
   res.send('API funcionando');
 });
 
 
+// =========================
+// MIDDLEWARE DE ERRORES
+// =========================
 
-// Usa esas rutas bajo el prefijo /api/auth
-app.use('/api/auth', authRoutes);
+app.use(errorHandler); // SIEMPRE al final
 
-// Levanta el servidor en el puerto 3000
-app.listen(3000, () => {
-  console.log('Servidor en puerto 3000');
+
+// =========================
+// CONEXIÓN A DB
+// =========================
+
+connectDB();
+
+
+// =========================
+// SERVER
+// =========================
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor en puerto ${PORT}`);
 });

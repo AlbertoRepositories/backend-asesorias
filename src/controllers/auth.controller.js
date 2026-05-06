@@ -1,48 +1,116 @@
-import * as authService from '../services/auth.service.js';
+import User from '../models/User.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-// Controller para registro
+// REGISTRO
 export const register = async (req, res) => {
   try {
-    // Llama al service con los datos del body
-    const user = await authService.register(req.body);
+    const { nombre_usuario, correo, contraseña, tipo_usuario } = req.body;
 
-    // Respuesta exitosa
+    // Validar campos obligatorios
+    if (!nombre_usuario || !correo || !contraseña || !tipo_usuario) {
+      return res.status(400).json({
+        success: false,
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    // Crear usuario (la contraseña se encripta automáticamente por el hook)
+    const user = new User({
+      nombre_usuario,
+      correo,
+      contraseña,
+      tipo_usuario
+    });
+
+    await user.save();
+
+    // Respuesta sin contraseña
     res.status(201).json({
       success: true,
-      data: user
+      data: {
+        _id: user._id,
+        nombre_usuario: user.nombre_usuario,
+        correo: user.correo
+      }
     });
 
   } catch (error) {
 
-    // Error de validación (ej. email duplicado)
-    res.status(400).json({
+    // Error de correo duplicado
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        code: 'EMAIL_ALREADY_EXISTS'
+      });
+    }
+
+    res.status(500).json({
       success: false,
-      code: 'VALIDATION_ERROR'
+      code: 'SERVER_ERROR'
     });
   }
 };
 
-// Controller para login
+
+// LOGIN
 export const login = async (req, res) => {
   try {
-    // Extrae datos del body
     const { correo, contraseña } = req.body;
 
-    // Llama al service
-    const data = await authService.login(correo, contraseña);
+    // Validar campos
+    if (!correo || !contraseña) {
+      return res.status(400).json({
+        success: false,
+        code: 'MISSING_FIELDS'
+      });
+    }
 
-    // Respuesta exitosa con token
+    // Buscar usuario
+    const user = await User.findOne({ correo });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    // Comparar contraseña
+    const isMatch = await bcrypt.compare(contraseña, user.contraseña);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    // Generar token
+    const token = jwt.sign(
+      {
+        id: user._id,
+        tipo_usuario: user.tipo_usuario
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
     res.status(200).json({
       success: true,
-      data
+      data: {
+        token,
+        usuario: {
+          _id: user._id,
+          tipo_usuario: user.tipo_usuario
+        }
+      }
     });
 
-  } catch (error) {
-
-    // Credenciales inválidas
-    res.status(401).json({
+  } catch {
+    res.status(500).json({
       success: false,
-      code: 'INVALID_CREDENTIALS'
+      code: 'SERVER_ERROR'
     });
   }
 };
