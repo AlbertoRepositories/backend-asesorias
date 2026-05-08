@@ -16,20 +16,21 @@ const userSchema = new mongoose.Schema({
     type: String, 
     enum: ['asesor', 'asesorado'], // Solo estos valores permitidos
     required: true 
+  },
+  calificacion: {
+    type: Number,
+    default: null
   }
 });
 
 // Hook de Mongoose: se ejecuta ANTES de guardar
-userSchema.pre('save', async function (next) {
-
+userSchema.pre('save', async function () {
   // Si la contraseña no cambió, no hace nada
-  if (!this.isModified('contraseña')) return next();
+  if (!this.isModified('contraseña')) return;
 
   // Encripta la contraseña antes de guardarla
   const salt = await bcrypt.genSalt(10);
   this.contraseña = await bcrypt.hash(this.contraseña, salt);
-
-  next();
 });
 
 // Exporta el modelo para usarlo en otros archivos

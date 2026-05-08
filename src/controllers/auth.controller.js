@@ -36,7 +36,6 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-
     // Error de correo duplicado
     if (error.code === 11000) {
       return res.status(400).json({
