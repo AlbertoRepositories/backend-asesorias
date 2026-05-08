@@ -39,15 +39,20 @@ export const crearAsesoria = async (req, res, next) => {
   }
 };
 
-// Controlador para obtener todas las asesorías con filtros
+// Controlador para obtener todas las asesorías con filtros y paginación
 export const getAsesorias = async (req, res, next) => {
   try {
     const filtros = {
       asignaturaId: req.query.asignaturaId,
-      fecha: req.query.fecha
+      fecha: req.query.fecha,
+      calificacionMin: req.query.calificacionMin ? Number(req.query.calificacionMin) : undefined
     };
 
-    const asesorias = await asesoriaService.getAsesorias(filtros);
+    // Parámetros de paginación requeridos por la rúbrica
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const asesorias = await asesoriaService.getAsesorias(filtros, page, limit);
 
     res.status(200).json({
       success: true,

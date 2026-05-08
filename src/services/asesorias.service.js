@@ -48,8 +48,8 @@ export const crearAsesoria = async (asesorId, data) => {
   return resultado;
 };
 
-// Función para obtener asesorías con filtros opcionales
-export const getAsesorias = async (filtros) => {
+// Función para obtener asesorías con filtros opcionales y paginación
+export const getAsesorias = async (filtros, page = 1, limit = 10) => {
   const query = { estado: 'disponible' };
 
   if (filtros.asignaturaId) {
@@ -65,10 +65,28 @@ export const getAsesorias = async (filtros) => {
     query.horario = { $gte: inicio, $lte: fin };
   }
 
-  // Buscamos y poblamos los datos del asesor y la asignatura
-  return await Asesoria.find(query)
+  // Calcular el salto para la paginación de Mongoose
+  const skip = (page - 1) * limit;
+
+  // Buscamos, aplicamos skip y limit, y poblamos los datos referenciados
+  let asesorias = await Asesoria.find(query)
     .populate('asesorId', 'nombre_usuario calificacion')
-    .populate('asignaturaId', 'nombre');
+    .populate('asignaturaId', 'nombre')
+    .skip(skip)
+    .limit(limit);
+
+  // Filtro por calificación mínima (se procesa después de poblar al usuario)
+  // Nota: un usuario inicia con calificacion 'null', solo lo mostramos si ya tiene evaluación y es >= al filtro.
+  if (filtros.calificacionMin !== undefined) {
+    asesorias = asesorias.filter(a => {
+      if (a.asesorId && a.asesorId.calificacion !== null) {
+        return a.asesorId.calificacion >= filtros.calificacionMin;
+      }
+      return false; // Se oculta si no tiene evaluaciones o su puntaje es menor
+    });
+  }
+
+  return asesorias;
 };
 
 // Función para obtener las asesorías creadas por un asesor específico

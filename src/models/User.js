@@ -20,6 +20,13 @@ const userSchema = new mongoose.Schema({
   calificacion: {
     type: Number,
     default: null
+  },
+  // DOCUMENTO EMBEBIDO: Auditoría del sistema (Requisito de rúbrica).
+  // Estos datos son exclusivos de la entidad, no se consultan de forma independiente
+  // y su tamaño está acotado. Además, no afectan al front-end en lo absoluto.
+  detalles_sistema: {
+    cuenta_activa: { type: Boolean, default: true },
+    fecha_registro_real: { type: Date, default: Date.now }
   }
 });
 

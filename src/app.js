@@ -10,6 +10,9 @@ dotenv.config();
 // Importa conexión a base de datos (modular)
 import { connectDB } from './config/db.js';
 
+// Importa la precarga de datos (Seed de catálogos)
+import { seedAsignaturas } from './utils/seed.js';
+
 // Importa el cron job para revisar asesorías sin inscritos
 import { initCron } from './utils/cron.js';
 
@@ -50,6 +53,9 @@ app.use(errorHandler); // SIEMPRE al final
 
 // CONEXIÓN A DB
 connectDB();
+
+// PRECARGA DE DATOS (Catálogos)
+seedAsignaturas();
 
 // inicialización de cron (programado para ejecutarse cada hora)
 initCron();

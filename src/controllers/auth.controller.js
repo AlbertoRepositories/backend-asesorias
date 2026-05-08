@@ -1,6 +1,4 @@
-import User from '../models/User.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import * as authService from '../services/auth.service.js';
 
 // REGISTRO
 export const register = async (req, res) => {
@@ -15,15 +13,8 @@ export const register = async (req, res) => {
       });
     }
 
-    // Crear usuario (la contraseña se encripta automáticamente por el hook)
-    const user = new User({
-      nombre_usuario,
-      correo,
-      contraseña,
-      tipo_usuario
-    });
-
-    await user.save();
+    // Delegar la creación del usuario a la capa de servicio (Arquitectura limpia)
+    const user = await authService.register(req.body);
 
     // Respuesta sin contraseña
     res.status(201).json({
@@ -65,48 +56,28 @@ export const login = async (req, res) => {
       });
     }
 
-    // Buscar usuario
-    const user = await User.findOne({ correo });
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        code: 'INVALID_CREDENTIALS'
-      });
-    }
-
-    // Comparar contraseña
-    const isMatch = await bcrypt.compare(contraseña, user.contraseña);
-
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        code: 'INVALID_CREDENTIALS'
-      });
-    }
-
-    // Generar token
-    const token = jwt.sign(
-      {
-        id: user._id,
-        tipo_usuario: user.tipo_usuario
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    // Delegar validación y generación de token al servicio
+    const result = await authService.login(correo, contraseña);
 
     res.status(200).json({
       success: true,
       data: {
-        token,
+        token: result.token,
         usuario: {
-          _id: user._id,
-          tipo_usuario: user.tipo_usuario
+          _id: result.user._id,
+          tipo_usuario: result.user.tipo_usuario
         }
       }
     });
 
-  } catch {
+  } catch (error) {
+    if (error.message === 'INVALID_CREDENTIALS') {
+      return res.status(401).json({
+        success: false,
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
     res.status(500).json({
       success: false,
       code: 'SERVER_ERROR'
