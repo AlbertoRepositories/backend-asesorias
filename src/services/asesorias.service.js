@@ -1,4 +1,5 @@
 import Asesoria from '../models/Asesoria.js';
+import Inscripcion from '../models/Inscripcion.js';
 import * as notificacionService from './notificaciones.service.js';
 
 // Función para crear una nueva asesoría
@@ -84,14 +85,34 @@ export const editarAsesoria = async (asesoriaId, data) => {
     throw new Error('PAST_DATE_ERROR');
   }
 
+  // Buscamos la asesoría antes de actualizar para comparar el horario
+  const asesoriaPrevia = await Asesoria.findById(asesoriaId);
+  if (!asesoriaPrevia) {
+    throw new Error('NOT_FOUND');
+  }
+
   const asesoriaActualizada = await Asesoria.findByIdAndUpdate(
     asesoriaId,
     { descripcion, horario, duracionMin, cupo },
     { new: true, runValidators: true }
   );
 
-  if (!asesoriaActualizada) {
-    throw new Error('NOT_FOUND');
+  // --- NOTIFICACIÓN POR REPROGRAMACIÓN ---
+  // Si el horario cambió, notificamos a los alumnos inscritos
+  if (horario && new Date(horario).getTime() !== new Date(asesoriaPrevia.horario).getTime()) {
+    const inscripciones = await Inscripcion.find({ 
+      asesoriaId: asesoriaId, 
+      estado: 'activa' 
+    });
+
+    for (const inscripcion of inscripciones) {
+      await notificacionService.crearNotificacion(
+        inscripcion.usuarioId,
+        'Asesoría reprogramada',
+        `La asesoría a la que estás inscrito ha cambiado de horario. La nueva fecha es: ${new Date(horario).toLocaleString()}`,
+        `/asesoria/${asesoriaId}`
+      );
+    }
   }
 
   return asesoriaActualizada;
@@ -117,10 +138,29 @@ export const cancelarAsesoria = async (asesoriaId) => {
     '/mis-asesorias'
   );
 
-  // TODO: En el servicio de inscripciones se debería notificar a los asesorados inscritos
+  // --- NOTIFICACIÓN A LOS ALUMNOS INSCRITOS ---
+  // Buscamos todas las inscripciones activas para esta asesoría
+  const inscripciones = await Inscripcion.find({ 
+    asesoriaId: asesoria._id, 
+    estado: 'activa' 
+  });
+
+  // Enviamos una notificación a cada alumno
+  for (const inscripcion of inscripciones) {
+    await notificacionService.crearNotificacion(
+      inscripcion.usuarioId,
+      'Asesoría cancelada',
+      `La asesoría a la que estabas inscrito para el ${new Date(asesoria.horario).toLocaleString()} ha sido cancelada por el asesor.`,
+      '/mis-inscripciones'
+    );
+    
+    // Opcional: También podríamos marcar la inscripción como 'cancelada' o 'inactiva'
+    inscripcion.estado = 'inactiva';
+    await inscripcion.save();
+  }
   
   return asesoria;
-};
+}
 
 // Función para obtener detalles de una asesoría por ID
 export const getAsesoriaById = async (id) => {

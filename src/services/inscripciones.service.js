@@ -1,10 +1,10 @@
 import Inscripcion from '../models/Inscripcion.js';
-import Asesoria from '../models/Asesoria.js'; 
+import Asesoria from '../models/Asesoria.js';
 import * as notificacionService from './notificaciones.service.js';
 
 // función para inscribir a un usuario en una asesoría
 export const inscribirUsuario = async (usuarioId, asesoriaId) => {
-  
+
   // se busca la asesoría para ver si existe y revisar el cupo
   const asesoria = await Asesoria.findById(asesoriaId);
   if (!asesoria) {
@@ -12,9 +12,9 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
   }
 
   // se cuenta cuántos asesorados están inscritos y activos en la asesoría
-  const inscritosActuales = await Inscripcion.countDocuments({ 
-    asesoriaId, 
-    estado: 'activa' 
+  const inscritosActuales = await Inscripcion.countDocuments({
+    asesoriaId,
+    estado: 'activa'
   });
 
   // validación de si hay cupos (comparación de inscritos con el cupo máximo de la asesoría)
@@ -37,6 +37,16 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
     `/asesoria/${asesoriaId}`
   );
 
+  // notificación al asesor si se llena la asesoría
+  if (inscritosActuales + 1 === asesoria.cupo) {
+    await notificacionService.crearNotificacion(
+      asesoria.asesorId,
+      '¡Asesoría Llena!',
+      `Tu asesoría ha alcanzado su cupo máximo de ${asesoria.cupo} alumnos.`,
+      `/asesoria/${asesoriaId}`
+    );
+  }
+
   // se guarda en la DB y se devuelve el resultado
   return await nuevaInscripcion.save();
 };
@@ -50,7 +60,7 @@ export const getInscripcionesPorAsesorado = async (usuarioId) => {
 // función para cancelar una inscripción (cambia el estado a inactiva)
 export const cancelarInscripcion = async (inscripcionId) => {
   const inscripcion = await Inscripcion.findByIdAndUpdate(
-    inscripcionId, 
+    inscripcionId,
     { estado: 'inactiva' },
     { new: true } // devuelve el documento actualizado
   ).populate('asesoriaId'); // "populate" para saber el nombre de la clase
