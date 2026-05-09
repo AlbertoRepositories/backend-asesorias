@@ -1,4 +1,5 @@
 import * as inscripcionService from '../services/inscripciones.service.js';
+import Inscripcion from '../models/Inscripcion.js';
 
 // función para inscribir a un asesorado en una asesoría
 export const inscribir = async (req, res) => {
@@ -45,6 +46,45 @@ export const listarInscripciones = async (req, res) => {
       success: true,
       data: lista
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      code: 'SERVER_ERROR'
+    });
+  }
+};
+
+// función para cancelar una inscripción a una asesoría
+export const cancelarInscripcion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuarioId = req.user.id;
+
+    // se verifica que el usuario está inscrito a la asesoría
+    const inscripcionExistente = await Inscripcion.findOne({
+      _id: id,
+      usuarioId: usuarioId,
+      estado: 'activa'
+    });
+
+    // si la inscripción no existe, se devuelve un mensaje de error
+    if (!inscripcionExistente) {
+      return res.status(404).json({
+        success: false,
+        code: 'INSCRIPCION_NOT_FOUND',
+        message: 'Inscripción no encontrada o no pertenece al usuario.'
+      });
+    }
+
+    // se llama al service para cancelar la inscripción
+    const inscripcionCancelada = await inscripcionService.cancelarInscripcion(id);
+
+    // mensaje de éxito con los detalles de la inscripción que se canceló
+    res.status(200).json({
+      success: true,
+      data: inscripcionCancelada
+    });
+    // manejo de errores internos del servidor
   } catch (error) {
     res.status(500).json({
       success: false,
