@@ -105,7 +105,26 @@ export const editarAsesoria = async (req, res, next) => {
   try {
     const { id } = req.params;
     
-    // Solo el asesor que la creó debería poder editarla
+    // Primero, verificamos que la asesoría exista para poder revisar quién es su dueño
+    const asesoriaExistente = await asesoriaService.getAsesoriaById(id);
+    if (!asesoriaExistente) {
+      return res.status(404).json({
+        success: false,
+        code: 'NOT_FOUND'
+      });
+    }
+
+    // Validación de propiedad (Seguridad estricta)
+    // El toString() es necesario porque asesorId viene como ObjectId de MongoDB
+    if (asesoriaExistente.asesorId._id.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        code: 'FORBIDDEN',
+        message: 'Solo el creador puede modificar esta asesoría'
+      });
+    }
+    
+    // Si pasa la seguridad, la editamos
     const asesoriaEditada = await asesoriaService.editarAsesoria(id, req.body);
 
     res.status(200).json({
@@ -134,6 +153,26 @@ export const editarAsesoria = async (req, res, next) => {
 export const cancelarAsesoria = async (req, res, next) => {
   try {
     const { id } = req.params;
+
+    // Primero verificamos que exista
+    const asesoriaExistente = await asesoriaService.getAsesoriaById(id);
+    if (!asesoriaExistente) {
+      return res.status(404).json({
+        success: false,
+        code: 'NOT_FOUND'
+      });
+    }
+
+    // Validación de propiedad (Seguridad estricta)
+    if (asesoriaExistente.asesorId._id.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        code: 'FORBIDDEN',
+        message: 'Solo el creador puede cancelar esta asesoría'
+      });
+    }
+
+    // Si pasa la seguridad, la cancelamos
     const asesoriaCancelada = await asesoriaService.cancelarAsesoria(id);
 
     res.status(200).json({

@@ -9,30 +9,43 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
   // Poblamos la asignatura para poder usar su nombre en la notificación
   const asesoria = await Asesoria.findById(asesoriaId).populate('asignaturaId', 'nombre');
   if (!asesoria) {
-    throw new Error('ASESORIA_NOT_FOUND'); // error de "asesoría no encontrada"
+    throw new Error('ASESORIA_NOT_FOUND');
   }
 
-  // se cuenta cuántos asesorados están inscritos y activos en la asesoría
+  // se cuenta cuántos asesorados están inscritos y activos
   const inscritosActuales = await Inscripcion.countDocuments({
     asesoriaId,
     estado: 'activa'
   });
 
-  // validación de si hay cupos (comparación de inscritos con el cupo máximo de la asesoría)
+  // validación de cupos
   if (inscritosActuales >= asesoria.cupo) {
-    throw new Error('NO_VACANCIES'); // error de "no hay vacantes"
+    throw new Error('NO_VACANCIES');
   }
 
-  // si no hay problemas, se crea el nuevo registro de inscripción
-  const nuevaInscripcion = new Inscripcion({
-    usuarioId,
-    asesoriaId,
-    estado: 'activa'
-  });
+  // Buscamos si ya había un registro previo (activo o inactivo)
+  let inscripcion = await Inscripcion.findOne({ usuarioId, asesoriaId });
 
+  if (inscripcion) {
+    // Si ya existe y está activa, bloqueamos
+    if (inscripcion.estado === 'activa') {
+      throw new Error('ALREADY_ENROLLED'); 
+    }
+    // Si estaba inactiva (cancelada previamente), la "revivimos"
+    inscripcion.estado = 'activa';
+  } else {
+    // Si nunca se había inscrito, creamos una nueva
+    inscripcion = new Inscripcion({
+      usuarioId,
+      asesoriaId,
+      estado: 'activa'
+    });
+  }
+
+  // Preparamos el nombre hermoso para la notificación (sin comillas raras)
   const nombreMateria = asesoria.asignaturaId ? asesoria.asignaturaId.nombre : 'Clase';
 
-  // se crea la notificación de inscripción exitosa y se envía al asesorado correspondiente
+  // Notificación de inscripción exitosa
   await notificacionService.crearNotificacion(
     usuarioId,
     '¡Te has inscrito a una asesoría!',
@@ -40,7 +53,7 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
     `/asesoria/${asesoriaId}`
   );
 
-  // notificación al asesor si se llena la asesoría
+  // Notificación al asesor si se llena
   if (inscritosActuales + 1 === asesoria.cupo) {
     await notificacionService.crearNotificacion(
       asesoria.asesorId,
@@ -50,8 +63,8 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
     );
   }
 
-  // se guarda en la DB y se devuelve el resultado
-  return await nuevaInscripcion.save();
+  // Guardamos (ya sea la nueva o la reactivada)
+  return await inscripcion.save();
 };
 
 // función para obtener todas las inscripciones de un asesorado

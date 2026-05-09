@@ -334,7 +334,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODI5MzIxNCwiZXhwIjoxNzc4Mzc5NjE0fQ.AqZ1hXSiH2j1tu4_KDtewIZ9DErbVERotgoXDbHdqME",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODMwNjY1MiwiZXhwIjoxNzc4MzkzMDUyfQ.XtPnRXvYGe8jZhYhI5z5S8HFMQQ9nNj_UEySYaMdXSA",
                   "type": "string"
                 }
               ]
@@ -343,7 +343,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{ \"asignaturaId\": \"69fe90890345280c75f8ef05\", \"descripcion\": \"Clase 3: Node.js y Express, ¿Cuál era la diferencia?\", \"horario\": \"2026-10-16T18:00:00.000Z\", \"duracionMin\": 120, \"cupo\": 5 }",
+              "raw": "{ \"asignaturaId\": \"69fe90890345280c75f8ef06\", \"descripcion\": \"Clase 34: COE nueva generación\", \"horario\": \"2026-10-16T10:00:00.000Z\", \"duracionMin\": 120, \"cupo\": 7 }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -373,7 +373,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODI5MzIxNCwiZXhwIjoxNzc4Mzc5NjE0fQ.AqZ1hXSiH2j1tu4_KDtewIZ9DErbVERotgoXDbHdqME",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODMwNjY1MiwiZXhwIjoxNzc4MzkzMDUyfQ.XtPnRXvYGe8jZhYhI5z5S8HFMQQ9nNj_UEySYaMdXSA",
                   "type": "string"
                 }
               ]
@@ -382,7 +382,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{ \"cupo\": 10, \"descripcion\": \"Tema actualizado, ahora se verá un nuevo tema; MongoDB II\" }",
+              "raw": "{ \"cupo\": 10, \"descripcion\": \"Tema actualizado, ahora se verá un nuevo tema; COE 35: Doceava intento\" }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -390,7 +390,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/asesorias/69fe9b1193dbdf6d987faca4",
+              "raw": "http://localhost:3000/api/asesorias/69fecee1c1dc23cbec38459f",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -399,7 +399,7 @@
               "path": [
                 "api",
                 "asesorias",
-                "69fe9b1193dbdf6d987faca4"
+                "69fecee1c1dc23cbec38459f"
               ]
             }
           },
@@ -413,7 +413,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODI5MzIxNCwiZXhwIjoxNzc4Mzc5NjE0fQ.AqZ1hXSiH2j1tu4_KDtewIZ9DErbVERotgoXDbHdqME",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODMwNjY1MiwiZXhwIjoxNzc4MzkzMDUyfQ.XtPnRXvYGe8jZhYhI5z5S8HFMQQ9nNj_UEySYaMdXSA",
                   "type": "string"
                 }
               ]
@@ -445,7 +445,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODI5MzIxNCwiZXhwIjoxNzc4Mzc5NjE0fQ.AqZ1hXSiH2j1tu4_KDtewIZ9DErbVERotgoXDbHdqME",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODMwNjY1MiwiZXhwIjoxNzc4MzkzMDUyfQ.XtPnRXvYGe8jZhYhI5z5S8HFMQQ9nNj_UEySYaMdXSA",
                   "type": "string"
                 }
               ]
@@ -528,7 +528,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODI5MzIxNCwiZXhwIjoxNzc4Mzc5NjE0fQ.AqZ1hXSiH2j1tu4_KDtewIZ9DErbVERotgoXDbHdqME",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5NGUxOTExNWQ3YzQxNmI1NDgyYSIsInRpcG9fdXN1YXJpbyI6ImFzZXNvciIsImlhdCI6MTc3ODMwNjY1MiwiZXhwIjoxNzc4MzkzMDUyfQ.XtPnRXvYGe8jZhYhI5z5S8HFMQQ9nNj_UEySYaMdXSA",
                   "type": "string"
                 }
               ]
@@ -536,7 +536,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/asesorias/69fea24353426f55eaf83474",
+              "raw": "http://localhost:3000/api/asesorias/69fecee1c1dc23cbec38459f",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -545,7 +545,7 @@
               "path": [
                 "api",
                 "asesorias",
-                "69fea24353426f55eaf83474"
+                "69fecee1c1dc23cbec38459f"
               ]
             }
           },
@@ -564,7 +564,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5ODliY2Q4OWYyNzkwY2QzYjU0ZiIsInRpcG9fdXN1YXJpbyI6ImFzZXNvcmFkbyIsImlhdCI6MTc3ODI5NTk4OSwiZXhwIjoxNzc4MzgyMzg5fQ.tpuTZpdCan2R1u2h8ZATbtBrY32IlH757kewJ3Enq68",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5ODliY2Q4OWYyNzkwY2QzYjU0ZiIsInRpcG9fdXN1YXJpbyI6ImFzZXNvcmFkbyIsImlhdCI6MTc3ODMwMzQzMCwiZXhwIjoxNzc4Mzg5ODMwfQ.3rPPMqatiQNIR2I91di0bS77JEZjpUF23r48L2kPfHc",
                   "type": "string"
                 }
               ]
@@ -573,7 +573,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{ \"asesoriaId\": \"69fe9b1193dbdf6d987faca4\" }",
+              "raw": "{ \"asesoriaId\": \"69fea1f653426f55eaf83472\" }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -603,7 +603,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5ODliY2Q4OWYyNzkwY2QzYjU0ZiIsInRpcG9fdXN1YXJpbyI6ImFzZXNvcmFkbyIsImlhdCI6MTc3ODI5NTk4OSwiZXhwIjoxNzc4MzgyMzg5fQ.tpuTZpdCan2R1u2h8ZATbtBrY32IlH757kewJ3Enq68",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5ODliY2Q4OWYyNzkwY2QzYjU0ZiIsInRpcG9fdXN1YXJpbyI6ImFzZXNvcmFkbyIsImlhdCI6MTc3ODMwMzQzMCwiZXhwIjoxNzc4Mzg5ODMwfQ.3rPPMqatiQNIR2I91di0bS77JEZjpUF23r48L2kPfHc",
                   "type": "string"
                 }
               ]
@@ -621,6 +621,37 @@
                 "api",
                 "inscripciones",
                 "mis-asesorias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Desinscribirse de asesorías",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5ODliY2Q4OWYyNzkwY2QzYjU0ZiIsInRpcG9fdXN1YXJpbyI6ImFzZXNvcmFkbyIsImlhdCI6MTc3ODMwMzQzMCwiZXhwIjoxNzc4Mzg5ODMwfQ.3rPPMqatiQNIR2I91di0bS77JEZjpUF23r48L2kPfHc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/inscripciones/69fed0f4a74dfb9aab695a2a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "inscripciones",
+                "69fed0f4a74dfb9aab695a2a"
               ]
             }
           },
@@ -724,7 +755,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5ODliY2Q4OWYyNzkwY2QzYjU0ZiIsInRpcG9fdXN1YXJpbyI6ImFzZXNvcmFkbyIsImlhdCI6MTc3ODI5NTk4OSwiZXhwIjoxNzc4MzgyMzg5fQ.tpuTZpdCan2R1u2h8ZATbtBrY32IlH757kewJ3Enq68",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmU5ODliY2Q4OWYyNzkwY2QzYjU0ZiIsInRpcG9fdXN1YXJpbyI6ImFzZXNvcmFkbyIsImlhdCI6MTc3ODMwMzQzMCwiZXhwIjoxNzc4Mzg5ODMwfQ.3rPPMqatiQNIR2I91di0bS77JEZjpUF23r48L2kPfHc",
                   "type": "string"
                 }
               ]

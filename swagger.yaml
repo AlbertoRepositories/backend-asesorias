@@ -170,6 +170,24 @@ paths:
         '200':
           description: Lista de inscripciones activas
 
+    /api/inscripciones/{id}:
+    delete:
+      summary: Cancela una inscripción activa (Solo Asesorado dueño)
+      tags: [Inscripciones]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: ID de la inscripción (no de la asesoría)
+      responses:
+        '200':
+          description: Inscripción cancelada exitosamente (estado inactiva)
+        '404':
+          description: Inscripción no encontrada o no pertenece al usuario
+
   # ================= EVALUACIONES =================
   /api/evaluaciones:
     post:

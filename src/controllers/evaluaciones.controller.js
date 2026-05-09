@@ -42,8 +42,9 @@ export const crearEvaluacion = async (req, res) => {
       });
     }
 
-    // Crear evaluación
+        // Crear evaluación
     const evaluacion = await evaluacionService.crearEvaluacion({
+      evaluadorId: req.user.id,
       asesorId,
       asesoriaId,
       calificacion,

@@ -28,6 +28,15 @@ export const inscribir = async (req, res) => {
       });
     }
 
+        // Manejo de reinscripción duplicada
+    if (error.message === 'ALREADY_ENROLLED') {
+      return res.status(400).json({
+        success: false,
+        code: 'ALREADY_ENROLLED',
+        message: 'El usuario ya se encuentra inscrito activamente en esta asesoría.'
+      });
+    }
+
     // error general del servidor si no hubo un error específico
     res.status(500).json({
       success: false,

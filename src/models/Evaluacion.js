@@ -3,6 +3,13 @@ import mongoose from 'mongoose';
 // Esquema de evaluación
 const evaluacionSchema = new mongoose.Schema({
 
+  // Referencia al alumno que está evaluando
+  evaluadorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+
   // Referencia al asesor evaluado
   asesorId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -35,9 +42,9 @@ const evaluacionSchema = new mongoose.Schema({
   timestamps: true // agrega createdAt automáticamente
 });
 
-// Evita que un usuario evalúe dos veces la misma asesoría
+// Evita que un ALUMNO evalúe dos veces la MISMA asesoría
 evaluacionSchema.index(
-  { asesorId: 1, asesoriaId: 1 },
+  { evaluadorId: 1, asesoriaId: 1 },
   { unique: true }
 );
 
