@@ -24,4 +24,13 @@ router.get(
   inscripcionesController.listarInscripciones
 );
 
+// ruta DELETE /api/inscripciones/:id
+// el asesorado puede desinscribirse de una asesoría
+router.delete(
+  '/:id', 
+  requireAuth, 
+  requireRole('asesorado'), 
+  inscripcionesController.cancelarInscripcion
+);
+
 export default router;
