@@ -31,7 +31,7 @@ export const crearEvaluacion = async (req, res) => {
 
     // Validar que esté inscrito
     const inscripcion = await evaluacionService.usuarioInscrito(
-      req.user._id,
+      req.user.id,
       asesoriaId
     );
 

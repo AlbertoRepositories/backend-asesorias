@@ -50,7 +50,7 @@ export const getAsesorias = async (req, res, next) => {
 
     // Parámetros de paginación requeridos por la rúbrica
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 8;
 
     const asesorias = await asesoriaService.getAsesorias(filtros, page, limit);
 

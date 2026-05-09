@@ -22,11 +22,11 @@ export const seedAsignaturas = async () => {
       ];
 
       await Asignatura.insertMany(asignaturasBase);
-      console.log('✅ Catálogo de Asignaturas precargado exitosamente.');
+      console.log('Catálogo de Asignaturas precargado exitosamente.');
     } else {
-      console.log('ℹ️ El catálogo de Asignaturas ya cuenta con datos. No es necesario precargar.');
+      console.log('El catálogo de Asignaturas ya cuenta con datos. No es necesario precargar.');
     }
   } catch (error) {
-    console.error('❌ Error al precargar las asignaturas:', error);
+    console.error('Error al precargar las asignaturas:', error);
   }
 };

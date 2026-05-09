@@ -49,7 +49,7 @@ export const crearAsesoria = async (asesorId, data) => {
 };
 
 // Función para obtener asesorías con filtros opcionales y paginación
-export const getAsesorias = async (filtros, page = 1, limit = 10) => {
+export const getAsesorias = async (filtros, page = 1, limit = 8) => {
   const query = { estado: 'disponible' };
 
   if (filtros.asignaturaId) {

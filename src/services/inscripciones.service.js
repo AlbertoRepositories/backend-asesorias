@@ -6,7 +6,8 @@ import * as notificacionService from './notificaciones.service.js';
 export const inscribirUsuario = async (usuarioId, asesoriaId) => {
 
   // se busca la asesoría para ver si existe y revisar el cupo
-  const asesoria = await Asesoria.findById(asesoriaId);
+  // Poblamos la asignatura para poder usar su nombre en la notificación
+  const asesoria = await Asesoria.findById(asesoriaId).populate('asignaturaId', 'nombre');
   if (!asesoria) {
     throw new Error('ASESORIA_NOT_FOUND'); // error de "asesoría no encontrada"
   }
@@ -29,11 +30,13 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
     estado: 'activa'
   });
 
+  const nombreMateria = asesoria.asignaturaId ? asesoria.asignaturaId.nombre : 'Clase';
+
   // se crea la notificación de inscripción exitosa y se envía al asesorado correspondiente
   await notificacionService.crearNotificacion(
     usuarioId,
     '¡Te has inscrito a una asesoría!',
-    `Te has inscrito exitosamente a la asesoría de "${asesoria.titulo}". ¡No olvides asistir en la fecha indicada!`,
+    `Te has inscrito exitosamente a la asesoría de ${nombreMateria}: ${asesoria.descripcion}. ¡No olvides asistir en la fecha indicada!`,
     `/asesoria/${asesoriaId}`
   );
 
@@ -59,18 +62,23 @@ export const getInscripcionesPorAsesorado = async (usuarioId) => {
 
 // función para cancelar una inscripción (cambia el estado a inactiva)
 export const cancelarInscripcion = async (inscripcionId) => {
+  // Poblamos asesoriaId y anidamos la poblacion de asignaturaId para sacar el nombre de la materia
   const inscripcion = await Inscripcion.findByIdAndUpdate(
     inscripcionId,
     { estado: 'inactiva' },
     { new: true } // devuelve el documento actualizado
-  ).populate('asesoriaId'); // "populate" para saber el nombre de la clase
+  ).populate({
+    path: 'asesoriaId',
+    populate: { path: 'asignaturaId', select: 'nombre' }
+  });
 
   // se crea la notificación de desinscripción de asesoría y se envía al asesorado correspondiente
-  if (inscripcion) {
+  if (inscripcion && inscripcion.asesoriaId) {
+    const nombreClase = inscripcion.asesoriaId.asignaturaId ? inscripcion.asesoriaId.asignaturaId.nombre : 'la asesoría';
     await notificacionService.crearNotificacion(
       inscripcion.usuarioId,
       '¡Te has desinscrito de una asesoría!',
-      `Has cancelado tu inscripción a "${inscripcion.asesoriaId.titulo}" exitosamente. Recuerda que aún podrás reinscribirte mientras exista cupo y estés dentro de la fecha límite.`,
+      `Has cancelado tu inscripción a la clase de ${nombreClase} exitosamente. Recuerda que aún podrás reinscribirte mientras exista cupo y estés dentro de la fecha límite.`,
       '/mis-asesorias'
     );
   }
