@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Asesorías</title>
+
+<!-- Bootstrap 4 -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+
+<!-- Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link 
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" 
+  rel="stylesheet"
+>
+
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1e40af;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --glass: rgba(255, 255, 255, 0.12);
+  --shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  color: #f1f5f9;
+  background: 
+    linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)),
+    url('https://images.pexels.com/photos/7972336/pexels-photo-7972336.jpeg') center/cover no-repeat;
+}
+
+/* Contenedor principal */
+.main-container {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 40px;
+}
+
+/* Navbar */
+.navbar {
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+/* Carrusel */
+.carousel {
+  max-width: 700px;
+  margin-bottom: 20px;
+}
+
+.carousel-item img {
+  height: 320px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+/* Texto con sombra */
+.main-container h1, 
+.main-container p, 
+.main-container span {
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+  font-weight: 600;
+}
+
+/* Card login */
+.card {
+  width: 50%;
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: var(--shadow);
+}
+
+.card-header h3 {
+  color: #fbbf24;
+}
+
+.input-group-prepend span {
+  background-color: #fbbf24;
+  color: black;
+}
+
+.login_btn {
+  background-color: #fbbf24;
+  color: black;
+  border: none;
+  border-radius: 10px;
+}
+
+.login_btn:hover {
+  background-color: #fde68a;
+}
+
+/* Botones */
+.btn-primary {
+  background-color: var(--primary);
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.btn-success {
+  background-color: var(--success);
+  border: none;
+}
+
+.btn-secondary {
+  border-radius: 10px;
+}
+
+/* Modal */
+.modal-content {
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card {
+    width: 90%;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand text-white"><i class="fas fa-graduation-cap"></i> Asesorías</a>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end"> 
+      <button class="btn btn-secondary me-md-2" type="button" href="#index_pruebas.html">
+        <i class="fas fa-school"></i> Inicio
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENIDO -->
+<div class="main-container text-center text-white">
+
+  <!-- CARRUSEL -->
+  <div id="carouselExample" class="carousel slide w-100" data-ride="carousel">
+    <div class="carousel-inner rounded">
+
+      <div class="carousel-item active">
+        <img class="d-block w-100" src="https://img.freepik.com/free-photo/happy-students-sitting-studying-outdoors-while-talking_171337-13401.jpg?semt=ais_incoming&w=740&q=80">
+      </div>
+
+      <div class="carousel-item">
+        <img class="d-block w-100" src="https://static.vecteezy.com/system/resources/thumbnails/001/269/528/small/young-collage-student-using-computer-to-study-online.jpg">
+      </div>
+
+      <div class="carousel-item">
+        <img class="d-block w-100" src="https://www.iteso.mx/documents/866203/1731326/IMG_AsAc01aqui2.jpg/89d98917-ea6a-340a-7db1-637a30e31d0c">
+      </div>
+
+    </div>
+
+    <a class="carousel-control-prev" href="#carouselExample" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon"></span></a>
+
+    <a class="carousel-control-next" href="#carouselExample" role="button" data-slide="next">
+      <span class="carousel-control-next-icon"></span></a>
+  </div>
+
+  <!-- BIENVENIDA -->
+  <h1>Bienvenid@ al Sistema de Asesorías</h1>
+  <p>Encuentre asesorías fácilmente o comparta su conocimiento</p>
+
+  <!-- CARD LOGIN -->
+  <div class="card mt-4">
+    <div class="card-header">
+      <h3><i class="fas fa-sign-in-alt"></i> Inicie sesión</h3>
+    </div>
+
+    <div class="card-body">
+      <form id="loginForm">
+
+        <div class="input-group form-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fas fa-user"></i></span>
+          </div>
+          <input type="email" class="form-control" placeholder="Correo" required>
+        </div>
+
+        <div class="input-group form-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fas fa-key"></i></span>
+          </div>
+          <input type="password" class="form-control" placeholder="Contraseña" required>
+        </div>
+
+        <div class="form-group">
+          <input type="submit" value="Iniciar Sesión" class="btn float-right login_btn">
+          <div class="mt-2">
+            <span>¿Sin cuenta?</span>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#registerModal">
+              ¡Regístrese ahora mismo!
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL REGISTRO -->
+  <div class="modal fade" id="registerModal">
+    <div class="modal-dialog">
+      <div class="modal-content bg-primary p-4">
+        <div class="modal-header">
+          <h1 class="modal-title text-black" id="exampleModalLabel">Registro de nuevo usuario</h1> 
+        </div>
+
+        <form id="registerForm">
+          <input class="form-control mb-2" placeholder="Nombre de usuario" required minlength="3">
+          <input type="email" class="form-control mb-2" placeholder="Correo" required>
+
+          <select class="form-control mb-2" required>
+            <option value="">Seleccione el tipo de usuario, por favor</option>
+            <option>Asesorado</option>
+            <option>Asesor</option>
+          </select>
+
+          <input type="password" class="form-control mb-2" placeholder="Contraseña" required
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{7,}"
+            title="Mínimo 7 caracteres, una mayúscula, una minúscula y un número">
+
+          <input type="password" class="form-control mb-2" placeholder="Confirme la contraseña" required
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{7,}"
+            title="Recuerde las especificaciones mínimas para su contraseña">
+
+          <div class="d-flex justify-content-center">
+            <button type="button" class="btn btn-danger m-1" data-dismiss="modal">Cancelar</button>
+            <button class="btn btn-success m-1" type="submit">¡Regístreme ahora!</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+
+  if(loginForm){
+    loginForm.addEventListener("submit", function(e){
+      e.preventDefault();
+      alert("Login exitoso");
+      window.location.href = "dashboard.html";
+    });
+  }
+
+  if(registerForm){
+    registerForm.addEventListener("submit", function(e){
+      e.preventDefault();
+      alert("Registro exitoso");
+      window.location.href = "dashboard.html";
+    });
+  }
+});
+</script>
+
+</body>
+</html>
