@@ -1,0 +1,261 @@
+openapi: 3.0.0
+info:
+  title: API de Asesorías Escolares
+  description: API REST completa para la gestión de asesorías, inscripciones, evaluaciones y notificaciones.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Servidor de Desarrollo Local
+paths:
+  # ================= AUTH =================
+  /api/auth/register:
+    post:
+      summary: Registra un nuevo usuario
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre_usuario: { type: string }
+                correo: { type: string }
+                contraseña: { type: string }
+                tipo_usuario: { type: string, enum: [asesor, asesorado] }
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+        '400':
+          description: Error de validación o correo duplicado
+
+  /api/auth/login:
+    post:
+      summary: Inicia sesión y devuelve un token JWT
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                correo: { type: string }
+                contraseña: { type: string }
+      responses:
+        '200':
+          description: Login exitoso, devuelve JWT
+        '401':
+          description: Credenciales inválidas
+
+  # ================= ASIGNATURAS =================
+  /api/asignaturas:
+    get:
+      summary: Lista el catálogo base de asignaturas disponibles
+      tags: [Catálogos]
+      responses:
+        '200':
+          description: Lista de asignaturas
+
+  # ================= ASESORÍAS =================
+  /api/asesorias:
+    get:
+      summary: Obtiene lista de asesorías con filtros y paginación
+      tags: [Asesorías]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 8 }
+        - in: query
+          name: asignaturaId
+          schema: { type: string }
+        - in: query
+          name: calificacionMin
+          schema: { type: number }
+      responses:
+        '200':
+          description: Paginación de asesorías disponibles
+
+    post:
+      summary: Crea una nueva asesoría (Solo Asesores)
+      tags: [Asesorías]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                asignaturaId: { type: string }
+                descripcion: { type: string }
+                horario: { type: string, format: date-time }
+                duracionMin: { type: integer }
+                cupo: { type: integer }
+      responses:
+        '201':
+          description: Asesoría creada
+
+  /api/asesorias/{id}:
+    put:
+      summary: Edita detalles de una asesoría (Solo Asesor creador)
+      tags: [Asesorías]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cupo: { type: integer }
+                descripcion: { type: string }
+      responses:
+        '200':
+          description: Asesoría actualizada exitosamente
+
+    delete:
+      summary: Cancela una asesoría y notifica a los inscritos
+      tags: [Asesorías]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Asesoría cancelada (eliminación lógica)
+
+  # ================= INSCRIPCIONES =================
+  /api/inscripciones:
+    post:
+      summary: Inscribe al usuario a una asesoría (Solo Asesorados)
+      tags: [Inscripciones]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                asesoriaId: { type: string }
+      responses:
+        '201':
+          description: Inscripción exitosa
+        '400':
+          description: Cupo lleno o no disponible
+
+  /api/inscripciones/mis-asesorias:
+    get:
+      summary: Lista las asesorías a las que el usuario está inscrito
+      tags: [Inscripciones]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de inscripciones activas
+
+    /api/inscripciones/{id}:
+    delete:
+      summary: Cancela una inscripción activa (Solo Asesorado dueño)
+      tags: [Inscripciones]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: ID de la inscripción (no de la asesoría)
+      responses:
+        '200':
+          description: Inscripción cancelada exitosamente (estado inactiva)
+        '404':
+          description: Inscripción no encontrada o no pertenece al usuario
+
+  # ================= EVALUACIONES =================
+  /api/evaluaciones:
+    post:
+      summary: Evalúa a un asesor tras la asesoría (Solo Asesorados)
+      tags: [Evaluaciones]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                asesorId: { type: string }
+                asesoriaId: { type: string }
+                calificacion: { type: integer, minimum: 1, maximum: 5 }
+                comentario: { type: string }
+      responses:
+        '201':
+          description: Evaluación guardada
+        '400':
+          description: No inscrito o calificación fuera de rango
+
+  /api/evaluaciones/{id_asesor}:
+    get:
+      summary: Lista las evaluaciones recibidas por un asesor
+      tags: [Evaluaciones]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id_asesor
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Arreglo de evaluaciones
+
+  # ================= NOTIFICACIONES =================
+  /api/notificaciones:
+    get:
+      summary: Obtiene las notificaciones del usuario autenticado
+      tags: [Notificaciones]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de notificaciones ordenadas por fecha
+
+  /api/notificaciones/{id}/leida:
+    patch:
+      summary: Marca una notificación específica como leída
+      tags: [Notificaciones]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Notificación actualizada
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
