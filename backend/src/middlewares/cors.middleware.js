@@ -11,21 +11,23 @@ const corsOptions = {
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://localhost:5000',
-    'http://127.0.0.1:5000'
+    'http://127.0.0.1:5000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000'
   ],
-  
+
   // Permite el envio de cookies y headers de autenticacion
   credentials: true,
-  
+
   // Metodos HTTP permitidos
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  
+
   // Headers permitidos en las peticiones
   allowedHeaders: ['Content-Type', 'Authorization'],
-  
+
   // Headers que el navegador puede acceder desde la respuesta
   exposedHeaders: ['Content-Length', 'X-JSON-Response-Type'],
-  
+
   // Tiempo que el navegador cachea la informacion de pre-flight (en segundos)
   maxAge: 86400
 };

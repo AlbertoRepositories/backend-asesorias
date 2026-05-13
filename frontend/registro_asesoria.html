@@ -153,13 +153,15 @@
 
   <div class="container mt-4">
     <div class="card p-4 mb-5">
-      <h4 class="mb-3"><i class="fas fa-plus-circle"></i> Nueva asesoría</h4>
+      <h4 class="mb-3" id="tituloFormulario"><i class="fas fa-plus-circle"></i> Nueva asesoría</h4>
 
       <!-- FORMULARIO -->
-      <form>
+      <!-- Se agrega id="formAsesoria" para que asesoriasModule.js pueda escuchar el submit -->
+      <form id="formAsesoria">
         <div class="mb-3">
           <label class="form-label fw-bold"><i class="fas fa-book-open"></i> Asignatura</label>
-          <select class="form-select" required>
+          <!-- id="selectAsignatura" para cargar las asignaturas del backend -->
+          <select class="form-select" id="selectAsignatura" required>
             <option value="">— Seleccione una asignatura —</option>
             <option>Cálculo Diferencial</option>
             <option>Cálculo Integral</option>
@@ -174,21 +176,25 @@
 
         <div class="mb-3">
           <label class="form-label fw-bold"><i class="fas fa-align-left"></i> Descripción</label>
-          <textarea class="form-control" rows="4" placeholder="Describe brevemente el contenido de la asesoría (mínimo 30, máximo 600 caracteres)…" minlength="30" maxlength="600" required></textarea>
+          <!-- id="descripcion" para leer su valor en el módulo -->
+          <textarea class="form-control" id="descripcion" rows="4" placeholder="Describe brevemente el contenido de la asesoría (mínimo 30, máximo 600 caracteres)…" minlength="30" maxlength="600" required></textarea>
         </div>
 
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label class="form-label fw-bold"><i class="fas fa-calendar-alt"></i> Fecha</label>
-            <input type="date" class="form-control" required>
+            <!-- id="fechaAsesoria" para leer la fecha -->
+            <input type="date" class="form-control" id="fechaAsesoria" required>
           </div>
           <div class="col-md-3">
             <label class="form-label fw-bold"><i class="fas fa-clock"></i> Hora de inicio</label>
-            <input type="time" class="form-control" required>
+            <!-- id="horaInicio" para calcular el horario -->
+            <input type="time" class="form-control" id="horaInicio" required>
           </div>
           <div class="col-md-3">
             <label class="form-label fw-bold"><i class="fas fa-clock"></i> Hora de fin</label>
-            <input type="time" class="form-control" required>
+            <!-- id="horaFin" para calcular la duración -->
+            <input type="time" class="form-control" id="horaFin" required>
           </div>
         </div>
 
@@ -209,11 +215,13 @@
 
         <div class="mb-4" style="max-width: 250px;">
           <label class="form-label fw-bold"><i class="fas fa-users"></i> Cupo máximo</label>
-          <input type="number" class="form-control" placeholder="Ej. 15" min="1" required>
+          <!-- id="cupo" para leer el cupo máximo -->
+          <input type="number" class="form-control" id="cupo" placeholder="Ej. 15" min="1" required>
         </div>
 
         <div class="d-flex flex-wrap gap-3">
-          <button type="submit" class="btn btn-success">
+          <!-- id="btnRegistrar" para poder cambiar el texto cuando editamos -->
+          <button type="submit" class="btn btn-success" id="btnRegistrar">
             <i class="fas fa-check-circle"></i> Registrar asesoría
           </button>
           <a href="dashboard.html" class="btn btn-secondary">
@@ -242,7 +250,8 @@
             estado <em>inactiva</em>.</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-danger">Sí, dar de baja</button>
+          <!-- id="btnConfirmarBaja" para que el módulo conecte la acción de cancelar -->
+          <button class="btn btn-danger" id="btnConfirmarBaja">Sí, dar de baja</button>
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         </div>
       </div>
@@ -253,6 +262,12 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
     </script>
+
+  <!-- Scripts del frontend - se cargan en orden: config → session → api → módulo -->
+  <script src="js/config.js"></script>
+  <script src="js/sessionManager.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/modules/asesoriasModule.js"></script>
 
 </body>
 

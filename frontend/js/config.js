@@ -5,7 +5,7 @@
 
 const API_CONFIG = {
   // URL base de la API (cambia según el ambiente)
-  BASE_URL: 'http://localhost:5000/api',
+  BASE_URL: 'http://localhost:3000/api',
   
   // Timeouts
   FETCH_TIMEOUT: 5000,
@@ -52,7 +52,8 @@ const API_CONFIG = {
     // Notificaciones
     NOTIFICATIONS: {
       LIST: '/notificaciones',
-      MARK_AS_READ: '/notificaciones/:id/leer'
+      // El backend usa PATCH y la ruta termina en /leida (no /leer)
+      MARK_AS_READ: '/notificaciones/:id/leida'
     }
   }
 };

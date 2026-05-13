@@ -209,7 +209,8 @@ class ApiManager {
    */
   async markNotificationAsRead(notificationId) {
     const endpoint = API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_AS_READ.replace(':id', notificationId);
-    return this.put(endpoint, {});
+    // El backend usa PATCH (no PUT) para actualizar solo el campo 'leido'
+    return this.request(endpoint, { method: 'PATCH', body: JSON.stringify({}) });
   }
 }
 

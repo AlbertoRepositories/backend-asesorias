@@ -205,366 +205,38 @@
         <div class="row align-items-center g-3">
           <div class="col-md-8">
             <h1 class="fw-bold mb-1">Centro de notificaciones</h1>
-            <p class="mb-0">Mantente al día con cambios, inscripciones y novedades en tus asesorías.</p>
+            <p class="mb-0">Manténte al día con cambios, inscripciones y novedades en tus asesorías.</p>
           </div>
           <div class="col-md-4 text-md-end">
-            <span class="badge bg-light text-dark section-badge"><i class="fas fa-bell"></i> 4 nuevas</span>
+            <!-- id="badgeContador" para que el módulo actualice el número de nuevas -->
+            <span class="badge bg-light text-dark section-badge" id="badgeContador"><i class="fas fa-bell"></i> Cargando...</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- NOTIFICACIONES PARA ASESORADO -->
+    <!-- NOTIFICACIONES NO LEIDAS - el módulo las genera dinámicamente -->
     <div class="container mt-5">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="section-title">Notificaciones para asesorado</h2>
-        <span class="badge bg-primary section-badge">Asesorado</span>
+        <h2 class="section-title">Notificaciones nuevas</h2>
+        <span class="badge bg-primary section-badge">No leídas</span>
       </div>
-
-      <div class="row g-3">
-        <!-- CARD DE NUEVA ASESORÍA -->
-        <div class="col-12 col-md-6">
-          <div class="card card-notificacion p-3 h-100">
-            <div class="d-flex justify-content-between align-items-start">
-              <div class="d-flex gap-3">
-                <div class="card-header-icon">🔵</div>
-                <div>
-                  <h4 class="mb-1">¡Nueva asesoría disponible!</h4>
-                  <p class="mb-2 text-muted">Juan Pérez ha creado una nueva asesoría de Cálculo Integral, ¡Podría interesarle!</p>
-                  <span class="badge badge-soft">Nueva</span>
-                </div>
-              </div>
-            </div>
-            <div class="divider-soft my-3"></div>
-            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalNuevaAsesoria">
-              Ver detalles
-            </button>
-          </div>
-        </div>
-
-        <!-- CARD DE ASESORÍA CANCELADA -->
-        <div class="col-12 col-md-6">
-          <div class="card card-notificacion p-3 h-100" style="border-left-color: var(--danger);">
-            <div class="d-flex gap-3">
-              <div class="card-header-icon">🔴</div>
-              <div>
-                <h4 class="mb-1">¡Asesoría cancelada!</h4>
-                <p class="mb-2 text-muted">Laura García ha cancelado la asesoría de Programación Orientada a Objetos.</p>
-                <span class="badge bg-danger">Importante</span>
-              </div>
-            </div>
-            <div class="divider-soft my-3"></div>
-            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalAsesoriaCancelada_asesorado">
-              Ver detalles
-            </button>
-          </div>
-        </div>
-
-        <!-- CARD DE ASESORÍA INSCRITA -->
-        <div class="col-12 col-md-6">
-          <div class="card card-notificacion p-3 h-100" style="border-left-color: var(--success);">
-            <div class="d-flex gap-3">
-              <div class="card-header-icon">🟢</div>
-              <div>
-                <h4 class="mb-1">¡Ha sido inscrito(a) en una asesoría!</h4>
-                <p class="mb-2 text-muted">Ha sido inscrito(a) en la asesoría de Física con éxito.</p>
-                <span class="badge bg-success">Confirmado</span>
-              </div>
-            </div>
-            <div class="divider-soft my-3"></div>
-            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalAsesoriaInscrita">
-              Ver detalles
-            </button>
-          </div>
-        </div>
-
-        <!-- CARD DE ASESORÍA DESINSCRITA -->
-        <div class="col-12 col-md-6">
-          <div class="card card-notificacion p-3 h-100" style="border-left-color: var(--warning);">
-            <div class="d-flex gap-3">
-              <div class="card-header-icon">🟡</div>
-              <div>
-                <h4 class="mb-1">¡Ha sido desinscrito(a) de una asesoría!</h4>
-                <p class="mb-2 text-muted">Ha sido desinscrito(a) de la asesoría de Matemáticas con éxito.</p>
-                <span class="badge bg-warning text-dark">Aviso</span>
-              </div>
-            </div>
-            <div class="divider-soft my-3"></div>
-            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalAsesoriaDesinscrita">
-              Ver detalles
-            </button>
-          </div>
+      <!-- id="listaNotificacionesNoLeidas" para que el módulo inyecte las tarjetas -->
+      <div class="row g-3" id="listaNotificacionesNoLeidas">
+        <div class="text-center text-muted py-4">
+          <i class="fas fa-spinner fa-spin"></i> Cargando notificaciones...
         </div>
       </div>
     </div>
 
-    <!-- MODALES DE NOTIFICACIONES PARA ASESORADO -->
-    <!-- MODAL DE NUEVA ASESORÍA -->
-    <div class="modal fade" id="modalNuevaAsesoria" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content p-4">
-          <div class="modal-header">
-            <h4 class="modal-title">Detalles</h4>
-          </div>
-          <div class="modal-body">
-            <h4>¡Nueva asesoría disponible!</h4>
-            <p><strong>Materia:</strong> Cálculo Integral</p>
-            <p><strong>Asesor:</strong> Juan Pérez</p>
-
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Hora</th>
-                  <th>Ubicación</th>
-                  <th>Modalidad</th>
-                  <th>Cupo</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>19/05/2026</td>
-                  <td>4:00 PM - 6:00 PM</td>
-                  <td>Edificio B, Aula 101</td>
-                  <td>Presencial</td>
-                  <td>3 cupos disponibles</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="modal-footer d-flex">
-            <a href="perfil_asesor.html" class="btn btn-info">
-              Ver perfil del asesor
-            </a>
-
-            <button class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalAsesoriaInscrita">
-              Inscribirse
-            </button>
-
-            <button class="btn btn-danger" data-bs-dismiss="modal">
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL DE ASESORÍA CANCELADA -->
-    <div class="modal fade" id="modalAsesoriaCancelada_asesorado" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content p-4">
-          <div class="modal-header">
-            <h4 class="modal-title">Detalles</h4>
-          </div>
-          <div class="modal-body">
-            <h4>¡Asesoría cancelada!</h4>
-            <p><strong>Materia:</strong> Programación Orientada a Objetos</p>
-            <p><strong>Asesor:</strong> Laura García</p>
-
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Hora</th>
-                  <th>Ubicación</th>
-                  <th>Modalidad</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>21/04/2026</td>
-                  <td>8:00 AM - 10:00 AM</td>
-                  <td>Edificio T, Aula 202</td>
-                  <td>Presencial</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="modal-footer d-flex">
-            <a href="perfil_asesor.html" class="btn btn-info">
-              Ver perfil del asesor
-            </a>
-
-            <button class="btn btn-danger" data-bs-dismiss="modal">
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL DE ASESORÍA DESINSCRITA -->
-    <div class="modal fade" id="modalAsesoriaDesinscrita" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content p-4">
-          <div class="modal-header">
-            <h4 class="modal-title">Detalles</h4>
-          </div>
-          <div class="modal-body">
-            <h4>¡Ha sido desinscrito(a) de una asesoría exitosamente!</h4>
-            <p><strong>Materia:</strong> Matemáticas</p>
-            <p><strong>Asesor:</strong> Juan Pérez</p>
-
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Hora</th>
-                  <th>Ubicación</th>
-                  <th>Modalidad</th>
-                  <th>Cupo</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>19/05/2026</td>
-                  <td>4:00 PM - 6:00 PM</td>
-                  <td>Edificio A, Aula 210</td>
-                  <td>Presencial</td>
-                  <td>5 cupos disponibles</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p><i>Usted ya no está inscrito(a) a esta asesoría.</i></p>
-          </div>
-
-          <div class="modal-footer d-flex">
-            <a href="perfil_asesor.html" class="btn btn-info">
-              Ver perfil del asesor
-            </a>
-
-            <button data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalAsesoriaInscrita" class="btn btn-success">
-              Inscribirse
-            </button>
-
-            <button class="btn btn-danger" data-bs-dismiss="modal">
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL DE ASESORÍA INSCRITA -->
-    <div class="modal fade" id="modalAsesoriaInscrita" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content p-4">
-          <div class="modal-header">
-            <h4 class="modal-title">Detalles</h4>
-          </div>
-          <div class="modal-body">
-            <h4>¡Ha sido inscrito(a) en una asesoría exitosamente!</h4>
-            <p><strong>Materia:</strong> Física</p>
-            <p><strong>Asesor:</strong> Carlos Flores</p>
-
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Hora</th>
-                  <th>Ubicación</th>
-                  <th>Modalidad</th>
-                  <th>Cupo</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>25/05/2026</td>
-                  <td>2:00 PM - 4:00 PM</td>
-                  <td>Edificio C, Aula 303</td>
-                  <td>Presencial</td>
-                  <td>2 cupos disponibles</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p><i>¡No olvides asistir a la asesoría el día de la sesión!</i></p>
-          </div>
-
-          <div class="modal-footer d-flex">
-            <a href="perfil_asesor.html" class="btn btn-info">
-              Ver perfil del asesor
-            </a>
-
-            <button class="btn btn-warning" data-bs-dismiss="modal" data-bs-target="#modal_desinscribir_asesoria" data-bs-toggle="modal">
-              Desincribirse
-            </button>
-
-            <button class="btn btn-danger" data-bs-dismiss="modal">
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- (resto del archivo igual, sin cambios funcionales) -->
-
-        <!-- NOTIFICACIONES PARA ASESOR -->
+    <!-- NOTIFICACIONES YA LEIDAS -->
     <div class="container mt-5">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="section-title">Notificaciones para asesor</h2>
-        <span class="badge bg-secondary section-badge">Asesor</span>
+        <h2 class="section-title">Notificaciones anteriores</h2>
+        <span class="badge bg-secondary section-badge">Leídas</span>
       </div>
-
-      <div class="row g-3">
-        <!-- CARD DE ASESORÍA CANCELADA-->
-        <div class="col-12 col-md-6">
-          <div class="card card-notificacion p-3 h-100" style="border-left-color: var(--danger);">
-            <div class="d-flex gap-3">
-              <div class="card-header-icon">🔴</div>
-              <div>
-                <h4 class="mb-1">¡Asesoría cancelada!</h4>
-                <p class="mb-2 text-muted">Has cancelado una asesoría de Cálculo Integral.</p>
-                <span class="badge bg-danger">Importante</span>
-              </div>
-            </div>
-            <div class="divider-soft my-3"></div>
-            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalAsesoriaCancelada_asesor">
-              Ver detalles
-            </button>
-          </div>
-        </div>
-      
-        <!-- CARD DE ASESORÍA CREADA-->
-        <div class="col-12 col-md-6">
-          <div class="card card-notificacion p-3 h-100" style="border-left-color: var(--success);">
-            <div class="d-flex gap-3">
-              <div class="card-header-icon">🟢</div>
-              <div>
-                <h4 class="mb-1">¡Asesoría creada!</h4>
-                <p class="mb-2 text-muted">Has creado una nueva asesoría de Álgebra lineal.</p>
-                <span class="badge bg-success">Nueva</span>
-              </div>
-            </div>
-            <div class="divider-soft my-3"></div>
-            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalAsesoriaCreada">
-              Ver detalles
-            </button>
-          </div>
-        </div>
-
-        <!-- CARD DE CUPO LLENO-->
-        <div class="col-12 col-md-6">
-          <div class="card card-notificacion p-3 h-100" style="border-left-color: var(--info);">
-            <div class="d-flex gap-3">
-              <div class="card-header-icon">🔵</div>
-              <div>
-                <h4 class="mb-1">¡Cupo lleno!</h4>
-                <p class="mb-2 text-muted">Se ha llenado el cupo de Programación Estructurada.</p>
-                <span class="badge bg-info text-dark">Aviso</span>
-              </div>
-            </div>
-            <div class="divider-soft my-3"></div>
-            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalCupoLleno">
-              Ver detalles
-            </button>
-          </div>
-        </div>        
-      </div>
+      <!-- id="listaNotificacionesLeidas" para las notificaciones ya leídas -->
+      <div class="row g-3" id="listaNotificacionesLeidas"></div>
     </div>
 
     <!-- MODALES DE NOTIFICACIONES PARA ASESOR -->
@@ -753,17 +425,11 @@
         crossorigin="anonymous">
     </script>
 
-    <script>
-        const verDetalles = document.querySelectorAll('[data-bs-toggle="modal"]');
-
-        verDetalles.forEach(boton => {
-            boton.addEventListener('click', function() {
-            const card = this.closest('.card');
-            if (card) {
-                card.classList.add('leida');
-            }
-            });
-        });
-    </script>
+    <!-- Scripts del frontend - se cargan en orden: config → session → api → módulo -->
+    <script src="js/config.js"></script>
+    <script src="js/sessionManager.js"></script>
+    <script src="js/api.js"></script>
+    <!-- notificacionesModule.js carga y muestra las notificaciones del backend -->
+    <script src="js/modules/notificacionesModule.js"></script>
   </body>
 </html>
