@@ -1,37 +1,48 @@
 import jwt from 'jsonwebtoken';
 
-// Middleware para proteger rutas
-export const requireAuth = (req, res, next) => {
-
-  // Obtiene header Authorization
-  const header = req.headers.authorization;
-
-  // Si no existe → error
-  if (!header) {
-    return res.status(401).json({
-      success: false,
-      code: 'UNAUTHORIZED'
-    });
-  }
-
-  // Extrae el token (formato: Bearer TOKEN)
-  const token = header.split(' ')[1];
-
+// Middleware para verificar autenticación
+export const autenticado = (req, res, next) => {
   try {
-    // Verifica el token con la clave secreta
+    // Obtener el token de la cookie (NO del header Authorization)
+    const token = req.cookies.authToken;
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        code: 'NO_TOKEN',
+        message: 'Token no encontrado. Por favor inicia sesión'
+      });
+    }
+
+    // Verificar y decodificar el token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Guarda datos del usuario en la request
+    // Guardar los datos del usuario en req.user para usarlos en los controllers
     req.user = decoded;
 
-    // Continúa a la siguiente función
     next();
 
-  } catch {
-    // Token inválido
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        code: 'TOKEN_EXPIRED',
+        message: 'Token expirado. Por favor inicia sesión de nuevo'
+      });
+    }
+
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        code: 'INVALID_TOKEN',
+        message: 'Token inválido'
+      });
+    }
+
     return res.status(401).json({
       success: false,
-      code: 'UNAUTHORIZED'
+      code: 'UNAUTHORIZED',
+      message: 'No autorizado'
     });
   }
 };

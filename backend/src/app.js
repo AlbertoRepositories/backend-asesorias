@@ -4,6 +4,9 @@ import express from 'express';
 // Importa dotenv para variables de entorno
 import dotenv from 'dotenv';
 
+// Importa cookie-parser para manejar cookies
+import cookieParser from 'cookie-parser';
+
 // Importa CORS middleware para permitir requests del frontend
 import corsMiddleware from './middlewares/cors.middleware.js';
 
@@ -39,6 +42,9 @@ const app = express();
 // Middleware CORS - DEBE SER LO PRIMERO ANTES QUE CUALQUIER OTRA COSA
 // Esto permite que el frontend acceda a los endpoints del backend
 app.use(corsMiddleware);
+
+// Middleware para parsear cookies (AGREGAR ANTES DE OTROS PARSERS)
+app.use(cookieParser());
 
 // Middleware para parsear JSON en el body de las peticiones
 app.use(express.json());
@@ -113,5 +119,5 @@ app.listen(PORT, () => {
   console.log(`CORS habilitado para origenes: ${process.env.ALLOWED_ORIGINS}`);
 });
 
-// Exporta la app por si es necesaria en otros archivos
+// Exporta la app
 export default app;

@@ -1,13 +1,20 @@
 import express from 'express';
-import { requireAuth } from '../middlewares/auth.middleware.js';
-import { crearEvaluacion, getEvaluacionesByAsesor } from '../controllers/evaluaciones.controller.js';
+import * as evaluacionesController from '../controllers/evaluaciones.controller.js';
+import { validateCreateEvaluacion, handleValidationErrors } from '../utils/validators.js';
+import { autenticado } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Crear evaluación
-router.post('/', requireAuth, crearEvaluacion);
+// Crear evaluación (requiere autenticación y validaciones)
+router.post(
+  '/',
+  autenticado,
+  validateCreateEvaluacion,
+  handleValidationErrors,
+  evaluacionesController.crearEvaluacion
+);
 
-// Obtener evaluaciones por asesor
-router.get('/:id_asesor', requireAuth, getEvaluacionesByAsesor);
+// Obtener evaluaciones de un asesor
+router.get('/:id_asesor', evaluacionesController.getEvaluacionesByAsesor);
 
 export default router;
