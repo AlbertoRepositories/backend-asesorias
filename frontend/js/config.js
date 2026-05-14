@@ -2,7 +2,7 @@
 // Define URLs base y constantes de la aplicacion
 
 const API_CONFIG = {
-  // URL base de la API - CORRECTED: localhost:5000 es el backend
+  // URL base de la API - Usa localhost para conectar con backend en puerto 5000
   BASE_URL: 'http://localhost:5000/api',
   
   // Timeouts
@@ -38,9 +38,10 @@ const API_CONFIG = {
     },
     // Inscripciones
     INSCRIPTIONS: {
-      CREATE: '/asesorias/:id/inscripciones',
+      // El backend recibe el asesoriaId en el body: POST /api/inscripciones
+      CREATE: '/inscripciones',
       DELETE: '/inscripciones/:id',
-      BY_USER: '/inscripciones/usuario'
+      BY_USER: '/inscripciones/mis-asesorias'
     },
     // Evaluaciones
     EVALUATIONS: {

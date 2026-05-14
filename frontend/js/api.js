@@ -136,9 +136,9 @@ class ApiManager {
   // ==================== INSCRIPCIONES ====================
 
   // Inscribirse en una asesoria
+  // el backend usa POST /api/inscripciones  con { asesoriaId } en el body
   async enrollInAsesoria(asesoriaId) {
-    const endpoint = API_CONFIG.ENDPOINTS.INSCRIPTIONS.CREATE.replace(':id', asesoriaId);
-    return this.post(endpoint, {});
+    return this.post(API_CONFIG.ENDPOINTS.INSCRIPTIONS.CREATE, { asesoriaId });
   }
 
   // Cancelar inscripcion
@@ -147,11 +147,10 @@ class ApiManager {
     return this.delete(endpoint);
   }
 
-  // Obtener mis inscripciones
+  // Obtener mis inscripciones activas
+  // el backend usa GET /api/inscripciones/mis-asesorias
   async getMyEnrollments() {
-    const user = sessionManager.getUser();
-    if (!user) return { data: [] };
-    return this.get(`${API_CONFIG.ENDPOINTS.INSCRIPTIONS.BY_USER}/${user._id}`);
+    return this.get(API_CONFIG.ENDPOINTS.INSCRIPTIONS.BY_USER);
   }
 
   // ==================== EVALUACIONES ====================

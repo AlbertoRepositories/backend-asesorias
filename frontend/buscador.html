@@ -23,112 +23,8 @@
         crossorigin="anonymous"
     />
 
-    <style>
-      :root {
-        --primary: #2563eb;
-        --primary-dark: #1e40af;
-        --success: #16a34a;
-        --danger: #dc2626;
-        --warning: #f59e0b;
-        --info: #0ea5e9;
-        --muted: #94a3b8;
-        --glass: rgba(255, 255, 255, 0.75);
-        --shadow: 0 10px 25px rgba(0,0,0,0.18);
-        --shadow-soft: 0 6px 18px rgba(0,0,0,0.12);
-      }
-
-      body {
-        font-family: "Poppins", sans-serif;
-        background: radial-gradient(circle at top, #1e293b 0%, #0f172a 45%, #0b1120 100%);
-        color: #e2e8f0;
-      }
-
-      .navbar {
-        background: linear-gradient(90deg, #1d4ed8, #2563eb);
-        box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-      }
-
-      .page-hero {
-        background: linear-gradient(135deg, #1d4ed8, #38bdf8);
-        color: white;
-        border-radius: 18px;
-        padding: 24px;
-        box-shadow: var(--shadow);
-      }
-
-      .card {
-        background: var(--glass);
-        backdrop-filter: blur(6px);
-        border: 1px solid rgba(255,255,255,0.6);
-        border-left: 6px solid var(--success);
-        border-radius: 16px;
-        box-shadow: var(--shadow-soft);
-        color: #1f2937;
-      }
-
-      .card:hover {
-        transform: translateY(-2px);
-        transition: 0.2s;
-        box-shadow: var(--shadow);
-      }
-
-      .btn-primary {
-        background-color: var(--primary);
-        border: none;
-      }
-
-      .btn-primary:hover {
-        background-color: var(--primary-dark);
-      }
-
-      .btn-success {
-        background-color: var(--success);
-        border: none;
-      }
-
-      .form-select,
-      .form-control {
-        border-radius: 10px;
-      }
-
-      .section-title {
-        font-weight: 700;
-        color: #f8fafc;
-      }
-
-      /* MODALS */
-      .modal-content {
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,0.6);
-        box-shadow: 0 18px 45px rgba(0,0,0,0.35);
-        background: linear-gradient(145deg, #f8fafc, #e2e8f0);
-        color: #1e293b;
-      }
-
-      .modal-header {
-        border-bottom: none;
-        padding-bottom: 0;
-      }
-
-      .modal-title {
-        font-weight: 700;
-        color: #1e293b;
-      }
-
-      .modal-body p,
-      .modal-body strong {
-        color: #1f2937;
-      }
-
-      .modal-body .table thead th {
-        background: #e2e8f0;
-        color: #0f172a;
-      }
-
-      .modal-footer {
-        border-top: none;
-      }
-    </style>
+    <!-- Common CSS - Estilos compartidos -->
+    <link rel="stylesheet" href="css/common.css">
   </head>
 
   <body>
@@ -139,9 +35,9 @@
         <a class="navbar-brand"><i class="fas fa-graduation-cap"></i> Asesorías</a>
 
         <!-- Barra de búsqueda -->
-        <form class="d-flex mx-auto w-50">
+        <form id="form-buscador" class="d-flex mx-auto w-50">
           <input class="form-control me-2" type="search" placeholder="Buscar materia, asesor..." required>
-          <button class="btn btn-success" type="submit">Buscar</button>
+          <button class="btn btn-success" type="button">Buscar</button>
         </form>
 
         <ul class="navbar-nav ms-auto">
@@ -178,43 +74,44 @@
 
         <div class="row g-3 mt-1">
           <div class="col-12 col-md-6 col-lg-3">
-            <select class="form-select">
-              <option selected>Materia</option>
-              <option>Cálculo</option>
-              <option>Álgebra</option>
+            <select class="form-select" id="filtro-materia">
+              <option value="" selected>Materia</option>
+              <option value="calculo">Cálculo</option>
+              <option value="algebra">Álgebra</option>
             </select>
           </div>
 
           <div class="col-12 col-md-6 col-lg-3">
-            <select class="form-select">
-              <option selected>Horario</option>
-              <option>Mañana</option>
-              <option>Tarde</option>
+            <select class="form-select" id="filtro-horario">
+              <option value="" selected>Horario</option>
+              <option value="Mañana">Mañana</option>
+              <option value="Tarde">Tarde</option>
             </select>
           </div>
 
           <div class="col-12 col-md-6 col-lg-3">
-            <select class="form-select">
-              <option selected>Disponible</option>
-              <option>Lleno</option>
-              <option>Cancelado</option>
+            <select class="form-select" id="filtro-disponibilidad">
+              <option value="" selected>Disponible</option>
+              <option value="disponible">Disponible</option>
+              <option value="lleno">Lleno</option>
+              <option value="cancelado">Cancelado</option>
             </select>
           </div>
 
           <div class="col-12 col-md-6 col-lg-3">
-            <select class="form-select">
-              <option selected>Calificación mínima</option>
-              <option>⭐ 1+</option>
-              <option>⭐ 2+</option>
-              <option>⭐ 3+</option>
-              <option>⭐ 4+</option>
-              <option>⭐ 5</option>
+            <select class="form-select" id="filtro-calificacion">
+              <option value="" selected>Calificación mínima</option>
+              <option value="1">⭐ 1+</option>
+              <option value="2">⭐ 2+</option>
+              <option value="3">⭐ 3+</option>
+              <option value="4">⭐ 4+</option>
+              <option value="5">⭐ 5</option>
             </select>
           </div>
         </div>
 
         <div class="mt-3">
-          <button class="btn btn-primary w-100">Aplicar filtros</button>
+          <button type="button" id="btn-aplicar-filtros" class="btn btn-primary w-100">Aplicar filtros</button>
         </div>
       </div>
     </div>
@@ -223,21 +120,14 @@
     <div class="container mt-4">
       <h2 class="mb-4 text-center fw-bold section-title">Estas son las asesorías encontradas según sus filtros</h2>
 
-      <div class="row g-4">
-        <div class="col-12 col-lg-8 mx-auto">
-          <div class="card card-asesoria p-4">
-            <h2><strong>Cálculo Integral</strong></h2>
-            <p><strong>Asesor:</strong> Juan Pérez</p>
-            <p><strong>Horario:</strong> 19/05/2026 | 4:00 PM - 6:00 PM</p>
-            <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#modalDetalles">
-              Ver detalles
-            </button>
-          </div>
+      <div id="contenedor-resultados" class="row g-4">
+        <div class="col-12 text-center text-muted">
+          Cargando asesorías...
         </div>
       </div>
+      <div id="paginacion-resultados" class="mt-3 text-end text-muted"></div>
     </div>
 
-    <!-- MODAL -->
     <div class="modal fade" id="modalDetalles" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content p-4">
@@ -245,8 +135,11 @@
             <h4 class="modal-title">Detalles de la asesoría</h4>
           </div>
           <div class="modal-body">
-            <h4>Cálculo Integral</h4>
-            <p><strong>Asesor:</strong> Juan Pérez</p>
+            <h4 id="modal-titulo">Cargando asesoría...</h4>
+            <p><strong>Asesor:</strong> <span id="modal-asesor">-</span></p>
+            <p><strong>Descripción:</strong> <span id="modal-descripcion">-</span></p>
+            <p><strong>Cupo:</strong> <span id="modal-cupo">-</span></p>
+            <p><strong>Horario:</strong> <span id="modal-horario">-</span></p>
 
             <table class="table">
               <thead>
@@ -260,11 +153,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>19/05/2026</td>
-                  <td>4:00 PM - 6:00 PM</td>
-                  <td>Edificio B, Aula 101</td>
-                  <td>Presencial</td>
-                  <td>3 cupos disponibles</td>
+                  <td id="modal-fecha">-</td>
+                  <td id="modal-hora">-</td>
+                  <td id="modal-ubicacion">-</td>
+                  <td id="modal-modalidad">-</td>
+                  <td id="modal-cupo-detalle">-</td>
                 </tr>
               </tbody>
             </table>
@@ -276,7 +169,7 @@
             <a href="perfil.html" class="btn btn-info">
               Ver perfil del asesor
             </a>
-            <button type="submit" class="btn btn-success">
+            <button type="button" id="btn-confirmar-inscripcion" class="btn btn-success">
               Inscribirse
             </button>
             <button class="btn btn-danger" data-bs-dismiss="modal">
@@ -293,5 +186,13 @@
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" 
         crossorigin="anonymous">
     </script>
+
+    <!-- Scripts del frontend - config, sesión, api, DOM y módulo de buscador -->
+    <script src="js/config.js"></script>
+    <script src="js/sessionManager.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/domManager.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/modules/buscadorModule.js"></script>
   </body>
 </html>

@@ -1,0 +1,122 @@
+/* Estilos generales de CSS para el frontend */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --info: #0ea5e9;
+    --muted: #94a3b8;
+    --glass: rgba(255, 255, 255, 0.75);
+    --shadow: 0 10px 25px rgba(0,0,0,0.18);
+    --shadow-soft: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 45%, #0b1120 100%);
+    color: #e2e8f0;
+}
+
+.navbar {
+    background: linear-gradient(90deg, #1d4ed8, #2563eb);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+.page-hero {
+    background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+    color: white;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+}
+
+.section-title {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: #f8fafc;
+}
+
+.card {
+    background: var(--glass);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-left: 6px solid var(--success);
+    border-radius: 16px;
+    box-shadow: var(--shadow-soft);
+    color: #1f2937;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    transition: 0.2s;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-success {
+    background-color: var(--success);
+    border: none;
+}
+
+.table thead th {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.divider-soft {
+    height: 1px;
+    background: linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0));
+}
+
+.sticky-col {
+    position: sticky;
+    top: 20px;
+}
+
+/* MODALS */
+.modal-content {
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+    background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+    color: #1e293b;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.modal-title {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.modal-body p,
+.modal-body strong {
+    color: #1f2937;
+}
+
+.modal-body .table thead th {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+.form-select,
+.form-control {
+    border-radius: 10px;
+}
