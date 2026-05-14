@@ -1,6 +1,7 @@
 // Gestor de sesion del usuario
-// Maneja sessionStorage para datos de usuario (NO token, que va en cookies)
-// El token se almacena en cookies httpOnly del navegador automaticamente
+// El token JWT va en cookies httpOnly (lo maneja el backend automáticamente).
+// Los datos del usuario se guardan en sessionStorage con respaldo en localStorage,
+// para que la sesión sobreviva navegaciones entre páginas del mismo dominio.
 
 class SessionManager {
   constructor() {
@@ -8,53 +9,62 @@ class SessionManager {
     this.initializeSession();
   }
 
-  // Inicializa la sesion desde storage
+  // Intenta recuperar la sesión desde sessionStorage primero,
+  // y si no existe, desde localStorage (respaldo entre páginas).
   initializeSession() {
-    const storedUser = sessionStorage.getItem(API_CONFIG.STORAGE_KEYS.USER);
+    try {
+      let stored = sessionStorage.getItem(API_CONFIG.STORAGE_KEYS.USER);
 
-    if (storedUser) {
-      this.user = JSON.parse(storedUser);
-      console.log('Sesion recuperada:', this.user.nombre_usuario);
+      // Respaldo: si sessionStorage está vacío pero localStorage tiene datos, usarlo
+      if (!stored) {
+        stored = localStorage.getItem(API_CONFIG.STORAGE_KEYS.USER);
+        if (stored) {
+          // Restaurar en sessionStorage para lecturas futuras dentro de la misma pestaña
+          sessionStorage.setItem(API_CONFIG.STORAGE_KEYS.USER, stored);
+        }
+      }
+
+      if (stored) {
+        this.user = JSON.parse(stored);
+        console.log('Sesión recuperada:', this.user.nombre_usuario);
+      }
+    } catch (e) {
+      console.warn('Error al recuperar sesión:', e);
+      this.user = null;
     }
   }
 
-  // Guarda los datos de sesion en sessionStorage
-  // userData: Datos del usuario (nombre, correo, tipo, etc)
-  // NOTA: El token NO se guarda aqui, va en cookies del navegador
+  // Guarda los datos del usuario.
+  // Se escribe en AMBOS storages para que la sesión persista al navegar entre páginas.
   saveSession(userData) {
     this.user = userData;
-    sessionStorage.setItem(API_CONFIG.STORAGE_KEYS.USER, JSON.stringify(userData));
-    console.log('Sesion guardada:', userData.nombre_usuario);
+    const json = JSON.stringify(userData);
+    sessionStorage.setItem(API_CONFIG.STORAGE_KEYS.USER, json);
+    localStorage.setItem(API_CONFIG.STORAGE_KEYS.USER, json);
+    console.log('Sesión guardada:', userData.nombre_usuario);
   }
 
-  // Obtiene los datos del usuario actual
-  // Retorna: Objeto con datos del usuario o null
   getUser() {
     return this.user;
   }
 
-  // Verifica si hay una sesion activa
-  // Retorna: true si hay usuario autenticado
   isSessionActive() {
     return this.user !== null;
   }
 
-  // Obtiene el tipo de usuario
-  // Retorna: 'asesor' o 'asesorado'
   getUserType() {
     return this.user?.tipo_usuario || null;
   }
 
-  // Destruye la sesion
-  // Limpia sessionStorage y datos en memoria
+  // Destruye la sesión en ambos storages.
   clearSession() {
     this.user = null;
     sessionStorage.removeItem(API_CONFIG.STORAGE_KEYS.USER);
-    console.log('Sesion cerrada');
+    localStorage.removeItem(API_CONFIG.STORAGE_KEYS.USER);
+    console.log('Sesión cerrada');
   }
 
-  // Guarda notificaciones pendientes en localStorage
-  // notifications: Array de notificaciones
+  // Notificaciones pendientes (se mantienen en localStorage porque sobreviven pestañas)
   saveNotifications(notifications) {
     localStorage.setItem(
       API_CONFIG.STORAGE_KEYS.NOTIFICATIONS,
@@ -62,8 +72,6 @@ class SessionManager {
     );
   }
 
-  // Obtiene notificaciones pendientes de localStorage
-  // Retorna: Array de notificaciones
   getNotifications() {
     const stored = localStorage.getItem(API_CONFIG.STORAGE_KEYS.NOTIFICATIONS);
     return stored ? JSON.parse(stored) : [];
