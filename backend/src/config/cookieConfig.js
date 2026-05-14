@@ -19,6 +19,6 @@ export const cookieOptions = {
 export const cookieOptionsDev = {
   httpOnly: true,
   secure: false,
-  sameSite: 'lax',
+  sameSite: 'none',   // ← CAMBIAR de 'lax' a 'none' para cross-origin en dev
   maxAge: 7 * 24 * 60 * 60 * 1000
 };
