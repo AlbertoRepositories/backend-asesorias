@@ -30,6 +30,13 @@ class ApiManager {
 
       // Manejar errores HTTP
       if (!response.ok) {
+        if (response.status === 401) {
+          if (typeof sessionManager !== 'undefined') {
+            sessionManager.clearSession();
+          }
+          throw new Error('SESSION_EXPIRED');
+        }
+
         throw new Error(
           `Error ${response.status}: ${response.statusText}`
         );
@@ -49,6 +56,18 @@ class ApiManager {
   // GET - Obtener datos
   get(endpoint) {
     return this.request(endpoint, { method: 'GET' });
+  }
+
+  async checkSession() {
+    try {
+      const response = await this.get(API_CONFIG.ENDPOINTS.TEST.PRIVATE);
+      return { valid: response?.success === true, user: response?.user || null };
+    } catch (error) {
+      if (error.message === 'SESSION_EXPIRED' || error.message.includes('401')) {
+        return { valid: false };
+      }
+      throw error;
+    }
   }
 
   // POST - Crear datos

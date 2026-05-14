@@ -36,8 +36,8 @@
 
         <!-- Barra de búsqueda -->
         <form id="form-buscador" class="d-flex mx-auto w-50">
-          <input class="form-control me-2" type="search" placeholder="Buscar materia, asesor..." required>
-          <button class="btn btn-success" type="button">Buscar</button>
+          <input id="search-term" class="form-control me-2" type="search" placeholder="Buscar materia, asesor o descripción" />
+          <button class="btn btn-success" type="submit">Buscar</button>
         </form>
 
         <ul class="navbar-nav ms-auto">
@@ -76,8 +76,6 @@
           <div class="col-12 col-md-6 col-lg-3">
             <select class="form-select" id="filtro-materia">
               <option value="" selected>Materia</option>
-              <option value="calculo">Cálculo</option>
-              <option value="algebra">Álgebra</option>
             </select>
           </div>
 
