@@ -43,7 +43,7 @@ const app = express();
 // Esto permite que el frontend acceda a los endpoints del backend
 app.use(corsMiddleware);
 
-// Middleware para parsear cookies (AGREGAR ANTES DE OTROS PARSERS)
+// Middleware para parsear cookies (SE AGREGA ANTES DE OTROS PARSERS)
 app.use(cookieParser());
 
 // Middleware para parsear JSON en el body de las peticiones

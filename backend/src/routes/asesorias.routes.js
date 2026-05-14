@@ -1,14 +1,14 @@
 import express from 'express';
 import * as asesoriasController from '../controllers/asesorias.controller.js';
 import { validateCreateAsesoria, validateEditAsesoria, handleValidationErrors } from '../utils/validators.js';
-import { autenticado } from '../middlewares/auth.middleware.js';
+import { requireAuth } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 // Crear asesoría (requiere autenticación y validaciones)
 router.post(
   '/',
-  autenticado,
+  requireAuth,
   validateCreateAsesoria,
   handleValidationErrors,
   asesoriasController.crearAsesoria
@@ -17,7 +17,7 @@ router.post(
 // Editar asesoría (requiere autenticación y validaciones)
 router.put(
   '/:id',
-  autenticado,
+  requireAuth,
   validateEditAsesoria,
   handleValidationErrors,
   asesoriasController.editarAsesoria
@@ -33,6 +33,6 @@ router.get('/asesor/:id', asesoriasController.getAsesoriasPorAsesor);
 router.get('/:id', asesoriasController.getAsesoriaById);
 
 // Cancelar asesoría
-router.delete('/:id', autenticado, asesoriasController.cancelarAsesoria);
+router.delete('/:id', requireAuth, asesoriasController.cancelarAsesoria);
 
 export default router;

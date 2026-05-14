@@ -1,15 +1,13 @@
-/**
- * Gestor centralizado de todas las peticiones HTTP
- * Implementa fetch con manejo de errores y autenticación
- */
+// Gestor centralizado de todas las peticiones HTTP
+// Implementa fetch con manejo de errores y autenticacion
+// IMPORTANTE: El token se envía en cookies automáticamente, NO en headers
 
 class ApiManager {
-  /**
-   * Realiza una petición HTTP genérica
-   * @param {string} endpoint - Ruta relativa del endpoint
-   * @param {Object} options - Opciones de fetch
-   * @returns {Promise<Object>} Respuesta del servidor
-   */
+  
+  // Realiza una peticion HTTP generica
+  // endpoint: Ruta relativa del endpoint ej: '/asesorias'
+  // options: Opciones de fetch
+  // NOTA: Las cookies se envían automáticamente por el navegador
   async request(endpoint, options = {}) {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
 
@@ -19,15 +17,15 @@ class ApiManager {
       ...options.headers
     };
 
-    // Agregar token si existe sesión activa
-    if (sessionManager.isSessionActive()) {
-      headers['Authorization'] = `Bearer ${sessionManager.getToken()}`;
-    }
+    // IMPORTANTE: NO agregar token en header porque el backend usa cookies
+    // Las cookies con httpOnly se envían automáticamente por fetch
 
     try {
       const response = await fetch(url, {
         ...options,
-        headers
+        headers,
+        // IMPORTANTE: Permitir que se envíen cookies con las peticiones
+        credentials: 'include'
       });
 
       // Manejar errores HTTP
@@ -39,30 +37,21 @@ class ApiManager {
 
       // Parsear respuesta JSON
       const data = await response.json();
-      console.log(`✓ ${options.method || 'GET'} ${endpoint}`, data);
+      console.log(`Peticion exitosa ${options.method || 'GET'} ${endpoint}:`, data);
       return data;
 
     } catch (error) {
-      console.error(`✗ ${options.method || 'GET'} ${endpoint}`, error);
+      console.error(`Error en peticion ${options.method || 'GET'} ${endpoint}:`, error);
       throw error;
     }
   }
 
-  /**
-   * GET - Obtener datos
-   * @param {string} endpoint
-   * @returns {Promise}
-   */
+  // GET - Obtener datos
   get(endpoint) {
     return this.request(endpoint, { method: 'GET' });
   }
 
-  /**
-   * POST - Crear datos
-   * @param {string} endpoint
-   * @param {Object} data
-   * @returns {Promise}
-   */
+  // POST - Crear datos
   post(endpoint, data) {
     return this.request(endpoint, {
       method: 'POST',
@@ -70,12 +59,7 @@ class ApiManager {
     });
   }
 
-  /**
-   * PUT - Actualizar datos
-   * @param {string} endpoint
-   * @param {Object} data
-   * @returns {Promise}
-   */
+  // PUT - Actualizar datos
   put(endpoint, data) {
     return this.request(endpoint, {
       method: 'PUT',
@@ -83,27 +67,27 @@ class ApiManager {
     });
   }
 
-  /**
-   * DELETE - Eliminar datos
-   * @param {string} endpoint
-   * @returns {Promise}
-   */
+  // PATCH - Actualizar parcialmente
+  patch(endpoint, data = {}) {
+    return this.request(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    });
+  }
+
+  // DELETE - Eliminar datos
   delete(endpoint) {
     return this.request(endpoint, { method: 'DELETE' });
   }
 
-  // ==================== AUTENTICACIÓN ====================
+  // ==================== AUTENTICACION ====================
 
-  /**
-   * Registrar nuevo usuario
-   */
+  // Registrar nuevo usuario
   async register(userData) {
     return this.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER, userData);
   }
 
-  /**
-   * Iniciar sesión
-   */
+  // Iniciar sesion
   async login(correo, contraseña) {
     return this.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
       correo,
@@ -111,11 +95,14 @@ class ApiManager {
     });
   }
 
-  // ==================== ASESORÍAS ====================
+  // Cerrar sesion
+  async logout() {
+    return this.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {});
+  }
 
-  /**
-   * Obtener todas las asesorías (con filtros)
-   */
+  // ==================== ASESORIAS ====================
+
+  // Obtener todas las asesorias (con filtros)
   async getAsesorias(filters = {}) {
     const params = new URLSearchParams(filters).toString();
     const endpoint = params 
@@ -124,93 +111,72 @@ class ApiManager {
     return this.get(endpoint);
   }
 
-  /**
-   * Crear nueva asesoría
-   */
+  // Crear nueva asesoria
   async createAsesoria(datosAsesoria) {
     return this.post(API_CONFIG.ENDPOINTS.ASESORIAS.CREATE, datosAsesoria);
   }
 
-  /**
-   * Obtener asesorías del asesor actual
-   */
+  // Obtener asesorias del asesor actual
   async getMyAsesorias() {
-    const userId = sessionManager.getUser()._id;
-    return this.get(`${API_CONFIG.ENDPOINTS.ASESORIAS.BY_ADVISOR}/${userId}`);
+    const user = sessionManager.getUser();
+    if (!user) return { data: [] };
+    return this.get(`${API_CONFIG.ENDPOINTS.ASESORIAS.BY_ADVISOR}/${user._id}`);
   }
 
-  /**
-   * Actualizar asesoría
-   */
+  // Actualizar asesoria
   async updateAsesoria(id, datos) {
     return this.put(`${API_CONFIG.ENDPOINTS.ASESORIAS.UPDATE}/${id}`, datos);
   }
 
-  /**
-   * Cancelar asesoría
-   */
+  // Cancelar asesoria
   async deleteAsesoria(id) {
     return this.delete(`${API_CONFIG.ENDPOINTS.ASESORIAS.DELETE}/${id}`);
   }
 
   // ==================== INSCRIPCIONES ====================
 
-  /**
-   * Inscribirse en una asesoría
-   */
+  // Inscribirse en una asesoria
   async enrollInAsesoria(asesoriaId) {
     const endpoint = API_CONFIG.ENDPOINTS.INSCRIPTIONS.CREATE.replace(':id', asesoriaId);
     return this.post(endpoint, {});
   }
 
-  /**
-   * Cancelar inscripción
-   */
+  // Cancelar inscripcion
   async cancelEnrollment(inscripcionId) {
     const endpoint = API_CONFIG.ENDPOINTS.INSCRIPTIONS.DELETE.replace(':id', inscripcionId);
     return this.delete(endpoint);
   }
 
-  /**
-   * Obtener mis inscripciones
-   */
+  // Obtener mis inscripciones
   async getMyEnrollments() {
-    const userId = sessionManager.getUser()._id;
-    return this.get(`${API_CONFIG.ENDPOINTS.INSCRIPTIONS.BY_USER}/${userId}`);
+    const user = sessionManager.getUser();
+    if (!user) return { data: [] };
+    return this.get(`${API_CONFIG.ENDPOINTS.INSCRIPTIONS.BY_USER}/${user._id}`);
   }
 
   // ==================== EVALUACIONES ====================
 
-  /**
-   * Evaluar a un asesor
-   */
+  // Evaluar a un asesor
   async evaluateAdvisor(evaluacionData) {
     return this.post(API_CONFIG.ENDPOINTS.EVALUATIONS.CREATE, evaluacionData);
   }
 
-  /**
-   * Obtener evaluaciones de un asesor
-   */
+  // Obtener evaluaciones de un asesor
   async getAdvisorEvaluations(asesorId) {
     return this.get(`${API_CONFIG.ENDPOINTS.EVALUATIONS.BY_ADVISOR}/${asesorId}`);
   }
 
   // ==================== NOTIFICACIONES ====================
 
-  /**
-   * Obtener notificaciones del usuario
-   */
+  // Obtener notificaciones del usuario
   async getNotifications() {
     return this.get(API_CONFIG.ENDPOINTS.NOTIFICATIONS.LIST);
   }
 
-  /**
-   * Marcar notificación como leída
-   */
+  // Marcar notificacion como leida
   async markNotificationAsRead(notificationId) {
     const endpoint = API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_AS_READ.replace(':id', notificationId);
-    // El backend usa PATCH (no PUT) para actualizar solo el campo 'leido'
-    return this.request(endpoint, { method: 'PATCH', body: JSON.stringify({}) });
+    return this.patch(endpoint, {});
   }
 }
 

@@ -1,11 +1,9 @@
-/**
- * Configuración centralizada de la API
- * Define URLs base y constantes de la aplicación
- */
+// Configuracion centralizada de la API
+// Define URLs base y constantes de la aplicacion
 
 const API_CONFIG = {
-  // URL base de la API (cambia según el ambiente)
-  BASE_URL: 'http://localhost:3000/api',
+  // URL base de la API - CORRECTED: localhost:5000 es el backend
+  BASE_URL: 'http://localhost:5000/api',
   
   // Timeouts
   FETCH_TIMEOUT: 5000,
@@ -19,7 +17,7 @@ const API_CONFIG = {
   
   // Endpoints de la API
   ENDPOINTS: {
-    // Autenticación
+    // Autenticacion
     AUTH: {
       LOGIN: '/auth/login',
       REGISTER: '/auth/register',
@@ -30,7 +28,7 @@ const API_CONFIG = {
       PROFILE: '/users',
       UPDATE: '/users'
     },
-    // Asesorías
+    // Asesorias
     ASESORIAS: {
       LIST: '/asesorias',
       CREATE: '/asesorias',
@@ -52,11 +50,10 @@ const API_CONFIG = {
     // Notificaciones
     NOTIFICATIONS: {
       LIST: '/notificaciones',
-      // El backend usa PATCH y la ruta termina en /leida (no /leer)
-      MARK_AS_READ: '/notificaciones/:id/leida'
+      MARK_AS_READ: '/notificaciones/:id/leer'
     }
   }
 };
 
-// Verificar que la API está disponible al cargar
+// Verificar que la API esta disponible al cargar
 console.log('API Config Loaded:', API_CONFIG.BASE_URL);

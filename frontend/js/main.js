@@ -1,25 +1,40 @@
-// frontend/assets/js/main.js
-import { AuthModule } from './auth.js';
-import { sessionStorage_utils } from './storage.js';
-import { DOMUtils } from './dom.js';
+// Inicializacion global de la aplicacion
+// Este archivo se ejecuta en TODAS las paginas
 
-// Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-  // Verificar si el usuario está autenticado
-  if (AuthModule.isAuthenticated()) {
-    const user = AuthModule.getCurrentUser();
-    console.log('Usuario autenticado:', user);
-    // Cargar datos dinámicos según el usuario
+  
+  // Verificar si el usuario esta autenticado
+  if (sessionManager.isSessionActive()) {
+    const user = sessionManager.getUser();
+    console.log('Usuario autenticado:', user.nombre_usuario);
+    
+    // Mostrar info del usuario en la navbar si existe el elemento
+    const userInfo = document.getElementById('user-info');
+    if (userInfo) {
+      userInfo.textContent = `Bienvenido, ${user.nombre_usuario}`;
+    }
   }
   
-  // Inicializar event listeners globales
+  // Configurar event listeners globales
   setupGlobalListeners();
 });
 
 function setupGlobalListeners() {
-  // Botón de logout (si existe)
-  const logoutBtn = DOMUtils.querySelector('[data-logout]');
+  
+  // Boton de logout si existe
+  const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => AuthModule.logout());
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await apiManager.logout();
+        sessionManager.clearSession();
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Error al cerrar sesion:', error);
+        // Forzar logout local aunque el backend falle
+        sessionManager.clearSession();
+        window.location.href = 'index.html';
+      }
+    });
   }
 }

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 // Middleware para verificar autenticación
-export const autenticado = (req, res, next) => {
+export const requireAuth = (req, res, next) => {
   try {
     // Obtener el token de la cookie (NO del header Authorization)
     const token = req.cookies.authToken;
