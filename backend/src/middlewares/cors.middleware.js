@@ -8,13 +8,17 @@ const corsOptions = {
   // Lista blanca de origenes permitidos
   // Incluye localhost para desarrollo local
   origin: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:5000',
-    'http://127.0.0.1:5000',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000'
-  ],
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5000',
+  'http://127.0.0.1:5000',
+  'http://localhost:5500',      // ← AGREGAR: Live Server
+  'http://127.0.0.1:5500',     // ← AGREGAR: Live Server (IP)
+  'http://localhost:5501',      // ← AGREGAR: Live Server (alternativo)
+  'http://127.0.0.1:5501',     // ← AGREGAR
+  'http://localhost:8000',
+  'http://127.0.0.1:8000'
+],
 
   // Permite el envio de cookies y headers de autenticacion
   credentials: true,

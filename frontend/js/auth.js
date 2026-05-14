@@ -9,7 +9,8 @@ class AuthModule {
   }
 
   initializeAuthPage() {
-    // Verificar si ya hay sesión activa
+    // Si ya hay sesión activa (ej: el usuario volvió a index habiendo iniciado sesión antes)
+    // lo mandamos directo al dashboard sin que tenga que loguearse de nuevo
     if (sessionManager.isSessionActive()) {
       this.redirectToDashboard();
       return;
@@ -21,7 +22,7 @@ class AuthModule {
   setupEventListeners() {
     // Botones para cambiar entre login y registro
     const btnToRegister = document.getElementById('btn-to-register');
-    const btnToLogin = document.getElementById('btn-to-login');
+    const btnToLogin    = document.getElementById('btn-to-login');
 
     if (btnToRegister) {
       btnToRegister.addEventListener('click', () => this.showRegisterForm());
@@ -30,8 +31,9 @@ class AuthModule {
       btnToLogin.addEventListener('click', () => this.showLoginForm());
     }
 
-    // Formularios
-    const formLogin = document.getElementById('form-login');
+    // Formularios (usados solo si la pagina tiene los forms de auth.js)
+    // Nota: index.html usa su propio script inline; esto cubre otras paginas
+    const formLogin    = document.getElementById('form-login');
     const formRegister = document.getElementById('form-register');
 
     if (formLogin) {
@@ -58,7 +60,7 @@ class AuthModule {
   async handleLogin(e) {
     e.preventDefault();
 
-    const correo = DomManager.getValue('login-email');
+    const correo    = DomManager.getValue('login-email');
     const contraseña = DomManager.getValue('login-password');
 
     if (!this.validateEmail(correo)) {
@@ -76,17 +78,14 @@ class AuthModule {
 
       const response = await apiManager.login(correo, contraseña);
 
-      // Guardar sesión
-      sessionManager.saveSession(response.data.usuario, response.data.token);
+      // CORRECCIÓN: saveSession solo recibe el objeto usuario
+      // El token se maneja automaticamente via cookies httpOnly del backend
+      sessionManager.saveSession(response.data.usuario);
 
-      // Redirigir según tipo de usuario
       this.redirectToDashboard();
 
     } catch (error) {
-      DomManager.showNotification(
-        `Error: ${error.message}`,
-        'error'
-      );
+      DomManager.showNotification(`Error: ${error.message}`, 'error');
     }
   }
 
@@ -96,13 +95,12 @@ class AuthModule {
   async handleRegister(e) {
     e.preventDefault();
 
-    const nombre_usuario = DomManager.getValue('register-username');
-    const correo = DomManager.getValue('register-email');
-    const contraseña = DomManager.getValue('register-password');
+    const nombre_usuario       = DomManager.getValue('register-username');
+    const correo               = DomManager.getValue('register-email');
+    const contraseña           = DomManager.getValue('register-password');
     const confirmar_contraseña = DomManager.getValue('register-confirm-password');
-    const tipo_usuario = DomManager.getValue('register-type');
+    const tipo_usuario         = DomManager.getValue('register-type');
 
-    // Validaciones
     if (!nombre_usuario || nombre_usuario.length < 3) {
       DomManager.showNotification('Nombre de usuario mínimo 3 caracteres', 'error');
       return;
@@ -129,23 +127,15 @@ class AuthModule {
     try {
       DomManager.showNotification('Registrando usuario...', 'info');
 
-      const response = await apiManager.register({
-        nombre_usuario,
-        correo,
-        contraseña,
-        tipo_usuario
-      });
+      await apiManager.register({ nombre_usuario, correo, contraseña, tipo_usuario });
 
-      DomManager.showNotification('Registro exitoso. Inicia sesión.', 'success');
+      DomManager.showNotification('Registro exitoso. Ahora inicia sesión.', 'success');
 
-      // Mostrar formulario de login
+      // Mostrar formulario de login para que el usuario entre
       this.showLoginForm();
 
     } catch (error) {
-      DomManager.showNotification(
-        `Error: ${error.message}`,
-        'error'
-      );
+      DomManager.showNotification(`Error: ${error.message}`, 'error');
     }
   }
 
@@ -166,18 +156,11 @@ class AuthModule {
   }
 
   /**
-   * Redirige al dashboard según tipo de usuario
+   * Redirige al dashboard
+   * El archivo real es dashboard.html para todos los tipos de usuario.
    */
   redirectToDashboard() {
-    const tipoUsuario = sessionManager.getUserType();
-    
-    if (tipoUsuario === 'asesor') {
-      window.location.href = './dashboard-asesor.html';
-    } else if (tipoUsuario === 'asesorado') {
-      window.location.href = './dashboard-asesorado.html';
-    } else {
-      window.location.href = './index.html';
-    }
+    window.location.href = 'dashboard.html';
   }
 }
 

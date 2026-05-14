@@ -16,16 +16,25 @@ let tipoPerfilVisto  = null;        // 'asesor' | 'asesorado' del perfil mostrad
 // ── INICIO ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
 
+  // CORRECCIÓN: Si no hay sesión activa, redirigir al login.
+  // Antes no había esta verificación, causando llamadas al backend sin cookie
+  // y errores de conexión confusos en la interfaz.
+  if (!sessionManager.isSessionActive()) {
+    console.warn('Sin sesión activa. Redirigiendo al login...');
+    window.location.href = 'index.html';
+    return;
+  }
+
   // Leer parámetros de la URL
   // Ejemplos:
   //   perfil.html              → mi propio perfil
   //   perfil.html?id=abc       → perfil de otro usuario
   //   perfil.html?id=abc&asesoriaId=xyz → perfil + evaluar asesoría específica
-  const params      = new URLSearchParams(window.location.search);
-  const idEnURL     = params.get('id');
-  asesoriaIdEval    = params.get('asesoriaId');
+  const params   = new URLSearchParams(window.location.search);
+  const idEnURL  = params.get('id');
+  asesoriaIdEval = params.get('asesoriaId');
 
-  const usuarioLocal = sessionManager.isSessionActive() ? sessionManager.getUser() : null;
+  const usuarioLocal = sessionManager.getUser();
 
   if (idEnURL) {
     // Viene con ?id= → perfil de alguien (puede ser el propio)
@@ -53,37 +62,32 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ── RENDERIZAR PERFIL ─────────────────────────────────────────
-// Pinta el banner, avatar, badge y calificación con los datos del usuario
 function renderizarPerfil(nombre, tipo, calificacion) {
   tipoPerfilVisto = tipo;
 
-  // Avatar con la primera letra del nombre
   const avatarEl = document.getElementById('avatarInicial');
   if (avatarEl) {
-    avatarEl.textContent  = nombre ? nombre.charAt(0).toUpperCase() : '?';
-    avatarEl.className    = `profile-avatar ${tipo || 'unknown'}`;
+    avatarEl.textContent = nombre ? nombre.charAt(0).toUpperCase() : '?';
+    avatarEl.className   = `profile-avatar ${tipo || 'unknown'}`;
   }
 
-  // Banner de color
   const bannerEl = document.getElementById('profileBanner');
   if (bannerEl) bannerEl.className = `profile-banner ${tipo || 'unknown'}`;
 
-  // Nombre
   const nombreEl = document.getElementById('nombrePerfil');
   if (nombreEl) nombreEl.textContent = nombre || 'Usuario';
 
-  // Badge de rol
   const rolEl = document.getElementById('rolBadge');
   if (rolEl) {
     if (tipo === 'asesor') {
-      rolEl.className   = 'profile-role-badge asesor';
-      rolEl.innerHTML   = '<i class="fas fa-user-tie me-1"></i> Asesor';
+      rolEl.className = 'profile-role-badge asesor';
+      rolEl.innerHTML = '<i class="fas fa-user-tie me-1"></i> Asesor';
     } else if (tipo === 'asesorado') {
-      rolEl.className   = 'profile-role-badge asesorado';
-      rolEl.innerHTML   = '<i class="fas fa-user-graduate me-1"></i> Asesorado';
+      rolEl.className = 'profile-role-badge asesorado';
+      rolEl.innerHTML = '<i class="fas fa-user-graduate me-1"></i> Asesorado';
     } else {
-      rolEl.className   = 'profile-role-badge unknown';
-      rolEl.innerHTML   = '<i class="fas fa-user me-1"></i> Usuario';
+      rolEl.className = 'profile-role-badge unknown';
+      rolEl.innerHTML = '<i class="fas fa-user me-1"></i> Usuario';
     }
   }
 
@@ -97,34 +101,31 @@ function renderizarPerfil(nombre, tipo, calificacion) {
     const estEl  = document.getElementById('calificacionEstrellas');
     const numEl  = document.getElementById('calificacionNum');
     if (estEl) estEl.textContent = '⭐'.repeat(llenas) + '☆'.repeat(vacias);
-    if (numEl) numEl.textContent = calificacion ? `${Number(calificacion).toFixed(1)} / 5.0` : 'Sin calificaciones aún';
+    if (numEl) numEl.textContent = calificacion
+      ? `${Number(calificacion).toFixed(1)} / 5.0`
+      : 'Sin calificaciones aún';
   }
 
-  // Mostrar las secciones correctas
   mostrarSeccionesSegunContexto(tipo);
 }
 
 // ── SECCIONES SEGÚN CONTEXTO ─────────────────────────────────
-// Decide qué mostrar en la columna derecha según quién ve el perfil de quién
 function mostrarSeccionesSegunContexto(tipoPerfilVisto) {
-  const secEval    = document.getElementById('seccionEvaluacion');
-  const secPropio  = document.getElementById('seccionPropioMensaje');
-  const btnAccion  = document.getElementById('botonesAccion');
-  const tituloSec  = document.getElementById('tituloSeccion');
-  const statLabel  = document.getElementById('statLabel');
+  const secEval   = document.getElementById('seccionEvaluacion');
+  const secPropio = document.getElementById('seccionPropioMensaje');
+  const btnAccion = document.getElementById('botonesAccion');
+  const tituloSec = document.getElementById('tituloSeccion');
+  const statLabel = document.getElementById('statLabel');
 
-  // Ocultar ambas secciones especiales por defecto
   if (secEval)   secEval.style.display   = 'none';
   if (secPropio) secPropio.style.display = 'none';
 
   if (esMiPerfil) {
     // ── MI PROPIO PERFIL ───────────────────────────
     if (tipoPerfilVisto === 'asesor') {
-      // Soy asesor viendo mi perfil
       if (tituloSec) tituloSec.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Mis asesorías';
       if (statLabel) statLabel.textContent = 'Asesorías';
 
-      // Botones: crear nueva asesoría
       if (btnAccion) {
         btnAccion.innerHTML = `
           <a href="registro_asesoria.html" class="btn action-btn btn-primary w-100">
@@ -136,7 +137,6 @@ function mostrarSeccionesSegunContexto(tipoPerfilVisto) {
         `;
       }
 
-      // Mensaje: no puedes evaluarte
       if (secPropio) {
         secPropio.style.display = '';
         const msg = document.getElementById('mensajePropioTexto');
@@ -169,7 +169,6 @@ function mostrarSeccionesSegunContexto(tipoPerfilVisto) {
   } else {
     // ── PERFIL AJENO ───────────────────────────────
     if (tipoPerfilVisto === 'asesor') {
-      // Veo el perfil de otro asesor
       if (tituloSec) tituloSec.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Asesorías disponibles';
       if (statLabel) statLabel.textContent = 'Asesorías';
 
@@ -181,65 +180,62 @@ function mostrarSeccionesSegunContexto(tipoPerfilVisto) {
         `;
       }
 
-      // Mostrar formulario de evaluación
       if (secEval) {
         secEval.style.display = '';
         configurarEstrellas();
       }
 
     } else {
-      // Veo el perfil de otro asesorado
       if (tituloSec) tituloSec.innerHTML = '<i class="fas fa-user-friends me-2"></i>Información del usuario';
       if (statLabel) statLabel.textContent = 'Inscripciones';
-
       if (btnAccion) btnAccion.innerHTML = '';
-      // No hay formulario de evaluación para asesorados
     }
   }
 }
 
 // ── CARGAR CONTENIDO DESDE EL BACKEND ────────────────────────
-// Pide datos según si el perfil es de asesor o asesorado
 async function cargarContenidoPerfil() {
   try {
-    // Primero intenta cargar las asesorías del usuario (si es asesor)
     const respuesta = await apiManager.get(`/asesorias/asesor/${asesorIdActual}`);
 
     if (respuesta.success) {
       const asesorias = respuesta.data;
 
-      // Si tiene asesorías → es asesor (o al menos tiene historial de asesor)
       const tipoDetectado = asesorias.length > 0
         ? (asesorias[0].asesorId?.tipo_usuario || 'asesor')
         : tipoPerfilVisto || 'asesor';
 
-      // Si aún no renderizamos el perfil (es perfil ajeno), hacerlo ahora
+      // Si es perfil ajeno y aún no lo renderizamos, hacerlo ahora con datos del backend
       if (!esMiPerfil) {
         const primeraAsesoria = asesorias[0];
         if (primeraAsesoria?.asesorId && typeof primeraAsesoria.asesorId === 'object') {
           const asesor = primeraAsesoria.asesorId;
           renderizarPerfil(asesor.nombre_usuario, asesor.tipo_usuario, asesor.calificacion);
         } else {
-          // No tenemos datos del asesor en las asesorías, mostrar nombre genérico
           renderizarPerfil('Asesor', 'asesor', null);
         }
       }
 
-      // Mostrar las asesorías disponibles
       mostrarListaAsesorias(asesorias, tipoDetectado);
 
-      // Actualizar el contador
       const disponibles = asesorias.filter(a => a.estado === 'disponible');
       const statEl = document.getElementById('statPrincipal');
       if (statEl) statEl.textContent = disponibles.length;
     }
 
   } catch (error) {
-    // Si falla (ej. 404) puede que sea un asesorado
+    // CORRECCIÓN: manejar sesión expirada
+    if (error.message.includes('401')) {
+      sessionManager.clearSession();
+      alert('Tu sesión ha expirado. Por favor inicia sesión de nuevo.');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Si falla (ej. 404) puede que sea un asesorado → cargar inscripciones
     console.warn('No se encontraron asesorías para este usuario:', error.message);
 
-    // Si es mi perfil y soy asesorado → cargar mis inscripciones
-    if (esMiPerfil && sessionManager.isSessionActive()) {
+    if (esMiPerfil) {
       cargarMisInscripciones();
     } else {
       const listaEl = document.getElementById('listaPrincipal');
@@ -291,8 +287,8 @@ function mostrarListaAsesorias(asesorias, tipo) {
 
 // Cargar las inscripciones del usuario asesorado logueado
 async function cargarMisInscripciones() {
-  const listaEl   = document.getElementById('listaPrincipal');
-  const tituloEl  = document.getElementById('tituloSeccion');
+  const listaEl  = document.getElementById('listaPrincipal');
+  const tituloEl = document.getElementById('tituloSeccion');
 
   if (tituloEl) tituloEl.innerHTML = '<i class="fas fa-book-open me-2"></i>Mis asesorías inscritas';
 
@@ -421,7 +417,12 @@ async function enviarEvaluacion() {
     if      (error.message.includes('409')) alert('Ya evaluaste a este asesor en esta asesoría');
     else if (error.message.includes('403')) alert('Solo puedes evaluar asesorías en las que estuviste inscrito');
     else if (error.message.includes('404')) alert('La asesoría o el asesor no fue encontrado');
-    else                                    alert('Error: ' + error.message);
+    else if (error.message.includes('401')) {
+      sessionManager.clearSession();
+      alert('Tu sesión ha expirado. Por favor inicia sesión de nuevo.');
+      window.location.href = 'index.html';
+    }
+    else alert('Error: ' + error.message);
     console.error(error);
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar evaluación'; }
