@@ -11,16 +11,25 @@ const PAGINAS_PROTEGIDAS = [
   'buscador.html'
 ];
  
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
  
   // Obtener el nombre del archivo actual (ej: "dashboard.html")
   const paginaActual = window.location.pathname.split('/').pop() || 'index.html';
  
-  // Si la pagina requiere sesion y no hay sesion activa -> redirigir al login
+  // Si la pagina requiere sesion y no hay sesion activa -> intentar restaurar desde el backend
   if (PAGINAS_PROTEGIDAS.includes(paginaActual) && !sessionManager.isSessionActive()) {
-    console.warn('Sesion requerida. Redirigiendo al login...');
-    window.location.href = 'index.html';
-    return; // Detener ejecucion para no intentar pintar la pagina
+    console.warn('Sesion requerida. No hay sesion local activa. Verificando backend...');
+    const sessionCheck = await apiManager.checkSession();
+ 
+    if (sessionCheck.valid && sessionCheck.user) {
+      console.log('Sesion restaurada desde backend:', sessionCheck.user.nombre_usuario);
+      sessionManager.saveSession(sessionCheck.user);
+    } else {
+      console.warn('Sesion invalida o expirada. Redirigiendo al login...');
+      sessionManager.clearSession();
+      window.location.href = 'index.html';
+      return; // Detener ejecucion para no intentar pintar la pagina
+    }
   }
  
   // Si hay sesion activa, mostrar el nombre del usuario en la navbar

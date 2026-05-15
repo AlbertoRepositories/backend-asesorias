@@ -20,118 +20,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
 
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-dark: #1e40af;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --warning: #f59e0b;
-      --info: #0ea5e9;
-      --muted: #94a3b8;
-      --glass: rgba(255, 255, 255, 0.75);
-      --shadow: 0 10px 25px rgba(0,0,0,0.18);
-      --shadow-soft: 0 6px 18px rgba(0,0,0,0.12);
-    }
-
-    body {
-      font-family: "Poppins", sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 45%, #0b1120 100%);
-      color: #e2e8f0;
-    }
-
-    .navbar {
-      background: linear-gradient(90deg, #1d4ed8, #2563eb);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-    }
-
-    .page-hero {
-      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
-      color: white;
-      border-radius: 18px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-    }
-
-    .section-title {
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      color: #f8fafc;
-    }
-
-    .card {
-      background: var(--glass);
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.6);
-      border-left: 6px solid var(--success);
-      border-radius: 16px;
-      box-shadow: var(--shadow-soft);
-      color: #1f2937;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      transition: 0.2s;
-      box-shadow: var(--shadow);
-    }
-
-    .btn-primary {
-      background-color: var(--primary);
-      border: none;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-dark);
-    }
-
-    .btn-success {
-      background-color: var(--success);
-      border: none;
-    }
-
-    .table thead th {
-      background-color: #e2e8f0;
-      color: #0f172a;
-    }
-
-    .divider-soft {
-      height: 1px;
-      background: linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0));
-    }
-
-    .sticky-col {
-      position: sticky;
-      top: 20px;
-    }
-
-    /* MODALS */
-    .modal-content {
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.6);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.35);
-      background: linear-gradient(145deg, #f8fafc, #e2e8f0);
-      color: #1e293b;
-    }
-
-    .modal-header {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .modal-title {
-      font-weight: 700;
-      color: #1e293b;
-    }
-
-    .modal-body p,
-    .modal-body strong {
-      color: #1f2937;
-    }
-
-    .modal-footer {
-      border-top: none;
-    }
-  </style>
+  <!-- Common CSS - Estilos compartidos -->
+  <link rel="stylesheet" href="css/common.css">
 </head>
 
 <body>
@@ -142,14 +32,24 @@
       <a class="navbar-brand"><i class="fas fa-graduation-cap"></i> Asesorías</a>
 
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
+        <!--
+          NOTA: El buscador solo es relevante para asesorados.
+          dashboardModule.js oculta la sección que no corresponde,
+          pero el navbar es compartido. Si quieres ocultarlo también
+          del navbar para asesores, añade id="nav-link-buscador"
+          y manéjalo en el módulo.
+        -->
+        <li class="nav-item" id="nav-link-buscador">
           <a class="nav-link" href="buscador.html">Buscar asesorías <i class="fas fa-search"></i></a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="notificaciones.html">Notificaciones <i class="fas fa-bell"></i></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="index.html">Cerrar sesión <i class="fas fa-sign-out-alt"></i></a>
+          <!-- id="btn-logout" → main.js conecta el evento de cierre de sesión -->
+          <a class="nav-link" href="#" id="btn-logout" style="cursor:pointer;">
+            Cerrar sesión <i class="fas fa-sign-out-alt"></i>
+          </a>
         </li>
       </ul>
     </div>
@@ -160,7 +60,8 @@
     <div class="page-hero">
       <div class="row align-items-center g-3">
         <div class="col-md-8">
-          <h1 class="fw-bold mb-1">Panel de Control</h1>
+          <!-- id="bienvenida-usuario" → dashboardModule.js escribe el nombre del usuario -->
+          <h1 class="fw-bold mb-1" id="bienvenida-usuario">Panel de Control</h1>
           <p class="mb-0">Gestiona asesorías, notificaciones y tu agenda de forma centralizada.</p>
         </div>
         <div class="col-md-4 text-md-end">
@@ -170,12 +71,15 @@
     </div>
   </div>
 
-  <div class="container mt-5">
-
-    <!-- SECCIÓN ASESOR -->
-    <h3 class="mb-3 section-title"><i class="fas fa-chalkboard-teacher"></i> Panel del Asesor</h3>
+  <!-- SECCIÓN ASESOR
+       id="seccion-asesor" → dashboardModule.js la muestra u oculta según el rol. -->
+  <div class="container mt-5" id="seccion-asesor">
+    <h3 class="mb-3 section-title">
+      <i class="fas fa-chalkboard-teacher"></i> Panel del Asesor
+    </h3>
 
     <div class="row g-4">
+
       <!-- Columna principal -->
       <div class="col-12 col-lg-8">
         <a href="registro_asesoria.html" class="btn btn-success mb-4">
@@ -185,7 +89,10 @@
         <div class="card p-3 mb-4">
           <h5><i class="fas fa-list"></i> Mis asesorías registradas</h5>
           <div class="table-responsive mt-3">
-            <table class="table table-hover">
+            <!--
+              id="tabla-asesorias-asesor" → dashboardModule.cargarAsesoriasDelAsesor()
+            -->
+            <table class="table table-hover" id="tabla-asesorias-asesor">
               <thead>
                 <tr>
                   <th>Materia</th>
@@ -198,33 +105,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Cálculo Integral</td>
-                  <td>19/05/2026 – 4:00 PM</td>
-                  <td>Presencial</td>
-                  <td>3 / 10</td>
-                  <td><span class="badge bg-success">Disponible</span></td>
-                  <td>
-                    <a href="registro_asesoria.html" class="btn btn-sm btn-primary me-1">
-                      <i class="fas fa-edit"></i> Editar
-                    </a>
-                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalCancelar">
-                      <i class="fas fa-times"></i> Cancelar
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Álgebra Lineal</td>
-                  <td>22/05/2026 – 10:00 AM</td>
-                  <td>Virtual</td>
-                  <td>10 / 10</td>
-                  <td><span class="badge bg-warning text-dark">Lleno</span></td>
-                  <td>
-                    <a href="registro_asesoria.html" class="btn btn-sm btn-primary me-1">
-                      <i class="fas fa-edit"></i> Editar
-                    </a>
-                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalCancelar">
-                      <i class="fas fa-times"></i> Cancelar
-                    </button>
+                  <td colspan="6" class="text-center text-muted">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando asesorías...
                   </td>
                 </tr>
               </tbody>
@@ -233,23 +115,33 @@
         </div>
       </div>
 
-      <!-- Columna de notificaciones (barra vertical) -->
+      <!-- Columna de notificaciones (lateral) -->
       <div class="col-12 col-lg-4">
         <div class="card p-3 h-100 sticky-col" style="border-left-color: var(--info);">
-          <h5><i class="fas fa-bell"></i> Notificaciones</h5>
-          <p class="mt-2">🔴 <strong>Álgebra Lineal</strong> – No hay inscritos para mañana.</p>
-          <p>🟢 <strong>Cálculo Integral</strong> – Nuevo inscrito: María López.</p>
+          <h5><i class="fas fa-bell"></i> Notificaciones recientes</h5>
+          <!--
+            class="lista-notificaciones-dashboard" → dashboardModule.cargarNotificacionesDashboard()
+            busca este elemento DENTRO de #seccion-asesor para agregar las notificaciones.
+          -->
+          <div class="lista-notificaciones-dashboard mt-2">
+            <p class="text-muted small"><i class="fas fa-spinner fa-spin"></i> Cargando...</p>
+          </div>
           <a href="notificaciones.html" class="btn btn-primary mt-auto">Ver todas</a>
         </div>
       </div>
+
     </div>
+  </div>
 
-    <div class="divider-soft my-4"></div>
-
-    <!-- SECCIÓN ASESORADO -->
-    <h3 class="mt-4 mb-3 section-title"><i class="fas fa-user-graduate"></i> Panel del Asesorado</h3>
+  <!-- SECCIÓN ASESORADO
+       id="seccion-asesorado" → dashboardModule.js la muestra u oculta según el rol.-->
+  <div class="container mt-5" id="seccion-asesorado">
+    <h3 class="mt-4 mb-3 section-title">
+      <i class="fas fa-user-graduate"></i> Panel del Asesorado
+    </h3>
 
     <div class="row g-4">
+
       <!-- Columna principal -->
       <div class="col-12 col-lg-8">
         <a href="buscador.html" class="btn btn-success mb-4">
@@ -259,7 +151,10 @@
         <div class="card p-3 mb-4">
           <h5><i class="fas fa-calendar-check"></i> Mis asesorías agendadas</h5>
           <div class="table-responsive mt-3">
-            <table class="table table-hover">
+            <!--
+              id="tabla-inscripciones" → dashboardModule.cargarMisInscripciones()
+            -->
+            <table class="table table-hover" id="tabla-inscripciones">
               <thead>
                 <tr>
                   <th>Materia</th>
@@ -270,23 +165,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Física</td>
-                  <td>25/05/2026 – 2:00 PM</td>
-                  <td>Carlos Flores</td>
-                  <td>
-                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalDesinscribir">
-                      <i class="fas fa-user-minus"></i> Desinscribirse
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Cálculo Integral</td>
-                  <td>19/05/2026 – 4:00 PM</td>
-                  <td>Juan Pérez</td>
-                  <td>
-                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalDesinscribir">
-                      <i class="fas fa-user-minus"></i> Desinscribirse
-                    </button>
+                  <td colspan="4" class="text-center text-muted">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando inscripciones...
                   </td>
                 </tr>
               </tbody>
@@ -294,47 +174,50 @@
           </div>
         </div>
 
-        <!-- Materias + Asesores en mismo renglón -->
+        <!-- Materias de interés -->
         <div class="row g-4">
           <div class="col-12 col-md-6">
             <div class="card p-3 h-100">
               <h5><i class="fas fa-book"></i> Mis materias de interés</h5>
-              <ul class="mt-2">
-                <li>Programación</li>
-                <li>Álgebra</li>
-                <li>Física</li>
-                <li>Cálculo</li>
-              </ul>
+              <p class="text-muted small mt-2">
+                Próximamente podrás gestionar tus materias de interés aquí.
+              </p>
             </div>
           </div>
           <div class="col-12 col-md-6">
             <div class="card p-3 h-100">
-              <h5><i class="fas fa-user-friends"></i> Asesores que sigo</h5>
-              <ul class="mt-2">
-                <li>Juan Pérez – <a href="perfil.html">Ver perfil</a></li>
-                <li>Carlos Flores – <a href="perfil.html">Ver perfil</a></li>
-                <li>Laura García – <a href="perfil.html">Ver perfil</a></li>
-              </ul>
+              <h5><i class="fas fa-user-friends"></i> Asesores</h5>
+              <p class="text-muted small mt-2">
+                Encuentra asesores disponibles en el
+                <a href="buscador.html" class="text-primary">buscador</a>.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Columna de notificaciones (barra vertical) -->
+      <!-- Columna de notificaciones (lateral) -->
       <div class="col-12 col-lg-4">
         <div class="card p-3 h-100 sticky-col" style="border-left-color: var(--info);">
-          <h5><i class="fas fa-bell"></i> Notificaciones</h5>
-          <p class="mt-2">🔵 <strong>Cálculo Integral</strong> – Nueva asesoría disponible con Juan Pérez.</p>
-          <p>🔴 <strong>Programación OO</strong> – Asesoría cancelada por Laura García.</p>
-          <p>🟢 <strong>Física</strong> – Inscripción confirmada.</p>
-          <p>🟡 <strong>Matemáticas</strong> – Has sido desinscrito/a.</p>
+          <h5><i class="fas fa-bell"></i> Notificaciones recientes</h5>
+          <!--
+            class="lista-notificaciones-dashboard" → dashboardModule.cargarNotificacionesDashboard()
+            busca este elemento DENTRO de #seccion-asesorado.
+          -->
+          <div class="lista-notificaciones-dashboard mt-2">
+            <p class="text-muted small"><i class="fas fa-spinner fa-spin"></i> Cargando...</p>
+          </div>
           <a href="notificaciones.html" class="btn btn-primary mt-auto">Ver todas</a>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- MODAL CANCELAR ASESORÍA (ASESOR) -->
+  <!-- MODALES DE CONFIRMACIÓN
+       (Se mantienen porque los botones del módulo los invocan con onclick) -->
+
+  <!-- modal cancelar asesoría (ASESOR), por dashboardModule.js -->
   <div class="modal fade" id="modalCancelar" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content p-3">
@@ -355,7 +238,7 @@
     </div>
   </div>
 
-  <!-- MODAL DESINSCRIBIRSE (ASESORADO) -->
+  <!-- Modal desinscribirse (ASESORADO), por confirmarDesinscripcion() -->
   <div class="modal fade" id="modalDesinscribir" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content p-3">
@@ -380,5 +263,20 @@
     integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
   </script>
 
+  <!--
+    orden:
+    1. config.js           : define API_CONFIG (URLs, endpoints, storage keys)
+    2. sessionManager.js   : define sessionManager (leer/guardar sesión)
+    3. api.js              : define apiManager (peticiones al backend)
+    4. domManager.js       : utilidades de manipulación del DOM
+    5. main.js             : lógica global: protección de páginas + logout
+    6. dashboardModule     : lógica específica del dashboard
+  -->
+  <script src="js/config.js"></script>
+  <script src="js/sessionManager.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/domManager.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/modules/dashboardModule.js"></script>
 </body>
 </html>

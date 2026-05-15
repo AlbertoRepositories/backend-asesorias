@@ -2,19 +2,19 @@
 // Define URLs base y constantes de la aplicacion
 
 const API_CONFIG = {
-  // URL base de la API - CORRECTED: localhost:5000 es el backend
+  // URL base de la API
   BASE_URL: 'http://localhost:5000/api',
-  
+
   // Timeouts
   FETCH_TIMEOUT: 5000,
-  
+
   // Claves de storage
   STORAGE_KEYS: {
     TOKEN: 'auth_token',
     USER: 'current_user',
     NOTIFICATIONS: 'pending_notifications'
   },
-  
+
   // Endpoints de la API
   ENDPOINTS: {
     // Autenticacion
@@ -22,6 +22,10 @@ const API_CONFIG = {
       LOGIN: '/auth/login',
       REGISTER: '/auth/register',
       LOGOUT: '/auth/logout'
+    },
+    // Ruta de prueba/verificacion de sesion (necesaria para checkSession en buscadorModule)
+    TEST: {
+      PRIVATE: '/test/private'
     },
     // Usuarios
     USERS: {
@@ -38,9 +42,9 @@ const API_CONFIG = {
     },
     // Inscripciones
     INSCRIPTIONS: {
-      CREATE: '/asesorias/:id/inscripciones',
+      CREATE: '/inscripciones',
       DELETE: '/inscripciones/:id',
-      BY_USER: '/inscripciones/usuario'
+      BY_USER: '/inscripciones/mis-asesorias'
     },
     // Evaluaciones
     EVALUATIONS: {
@@ -50,10 +54,9 @@ const API_CONFIG = {
     // Notificaciones
     NOTIFICATIONS: {
       LIST: '/notificaciones',
-      MARK_AS_READ: '/notificaciones/:id/leer'
+      MARK_AS_READ: '/notificaciones/:id/leida'
     }
   }
 };
 
-// Verificar que la API esta disponible al cargar
 console.log('API Config Loaded:', API_CONFIG.BASE_URL);

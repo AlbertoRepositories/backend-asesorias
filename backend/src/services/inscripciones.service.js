@@ -68,9 +68,16 @@ export const inscribirUsuario = async (usuarioId, asesoriaId) => {
 };
 
 // función para obtener todas las inscripciones de un asesorado
+// se usa un populate anidado para que el dashboard y el perfil puedan mostrar el nombre de la materia y del asesor sin peticiones extras
 export const getInscripcionesPorAsesorado = async (usuarioId) => {
-  // se devuelven las inscripciones (uso de "populate" para obtener también los detalles de la asesoría)
-  return await Inscripcion.find({ usuarioId, estado: 'activa' }).populate('asesoriaId');
+  return await Inscripcion.find({ usuarioId, estado: 'activa' })
+    .populate({
+      path: 'asesoriaId',
+      populate: [
+        { path: 'asignaturaId', select: 'nombre' },
+        { path: 'asesorId',     select: 'nombre_usuario calificacion' }
+      ]
+    });
 };
 
 // función para cancelar una inscripción (cambia el estado a inactiva)
