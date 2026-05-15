@@ -75,9 +75,11 @@ export const login = async (req, res) => {
     res.cookie('authToken', result.token, options);
 
     // Respuesta con datos del usuario (NO incluir token en JSON)
+    // Respuesta con datos del usuario Y el token (ahora se envía en JSON)
     res.status(200).json({
       success: true,
       data: {
+        token: result.token,
         usuario: {
           _id: result.user._id,
           nombre_usuario: result.user.nombre_usuario,
@@ -109,13 +111,11 @@ export const login = async (req, res) => {
 // LOGOUT
 export const logout = async (req, res) => {
   try {
-    // Limpiar la cookie del token
-    res.clearCookie('authToken');
-
-    res.status(200).json({
-      success: true,
-      message: 'Sesión cerrada correctamente'
-    });
+    // Limpiar la cookie del token con las mismas opciones con que se creó
+    // (sin maxAge — clearCookie lo ignora de todas formas)
+    const options = process.env.NODE_ENV === 'production' ? cookieOptions : cookieOptionsDev;
+    const { maxAge, ...clearOptions } = options;
+    res.clearCookie('authToken', clearOptions);
 
   } catch (error) {
     console.error('Error en logout:', error);

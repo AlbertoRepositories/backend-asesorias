@@ -3,26 +3,41 @@ import jwt from 'jsonwebtoken';
 // Middleware para verificar autenticación
 export const requireAuth = (req, res, next) => {
   try {
-    // Obtener el token de la cookie (NO del header Authorization)
-    const token = req.cookies.authToken;
+    // Obtener token desde cookie o Authorization header
+    let token = req.cookies?.authToken;
 
+    // Soporte para Bearer token desde frontend
+    if (!token && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+
+      if (parts.length === 2 && parts[0] === 'Bearer') {
+        token = parts[1];
+      }
+    }
+
+    // Si no existe token
     if (!token) {
       return res.status(401).json({
         success: false,
-        code: 'NO_TOKEN',
-        message: 'Token no encontrado. Por favor inicia sesión'
+        code: 'TOKEN_REQUIRED',
+        message: 'Token requerido'
       });
     }
 
-    // Verificar y decodificar el token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verificar JWT
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'secret'
+    );
 
-    // Guardar los datos del usuario en req.user para usarlos en los controllers
+    // Guardar usuario decodificado en request
     req.user = decoded;
 
+    // Continuar
     next();
 
   } catch (error) {
+
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,

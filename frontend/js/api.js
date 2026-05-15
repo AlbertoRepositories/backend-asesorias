@@ -1,52 +1,49 @@
 // Gestor centralizado de todas las peticiones HTTP
-// IMPORTANTE: El token se envía en cookies automáticamente, NO en headers
+// CORREGIDO: Token se guarda en localStorage y se envía en Authorization header
 
 class ApiManager {
 
-  // Realiza una peticion HTTP generica
+  // Realiza una petición HTTP genérica
   async request(endpoint, options = {}) {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+
+    // Obtener el token del localStorage (si existe)
+    const token = localStorage.getItem(API_CONFIG.STORAGE_KEYS.TOKEN);
 
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers
     };
 
+    // Si hay token, incluirlo en Authorization header
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
-        // Permite que las cookies httpOnly se envíen con cada petición
+        // Permite envío de cookies HTTPOnly si el backend las usa
         credentials: 'include'
       });
 
-      // Solo 401 significa sesión expirada/inválida
-      if (response.status === 401) {
-        if (typeof sessionManager !== 'undefined') {
-          sessionManager.clearSession();
-        }
-        throw new Error('SESSION_EXPIRED');
-      }
-
-      // Otros errores HTTP: lanzar con el código para que el módulo decida qué hacer
+      // Si no está ok, lanzar error con el código HTTP
       if (!response.ok) {
-        throw new Error(`${response.status}`);
+        throw new Error(response.status.toString());
       }
 
       const data = await response.json();
       return data;
 
     } catch (error) {
-      // Re-lanzar errores que ya tienen formato esperado
-      if (
-        error.message === 'SESSION_EXPIRED' ||
-        /^\d{3}$/.test(error.message)         // ej. "404", "409", "500"
-      ) {
+      // Si es un error que ya lanzamos (código HTTP)
+      if (/^\d{3}$/.test(error.message)) {
         throw error;
       }
 
-      // Error de red (backend caído, CORS, timeout, etc.)
-      // NO tratarlo como sesión expirada: solo re-lanzar con mensaje claro
+      // Error de red
+      console.error('Error en request:', error.message);
       throw new Error('NETWORK_ERROR');
     }
   }
@@ -55,27 +52,6 @@ class ApiManager {
 
   get(endpoint) {
     return this.request(endpoint, { method: 'GET' });
-  }
-
-  // Verifica si la cookie de sesión sigue siendo válida en el backend.
-  // Retorna { valid: true/false } sin redirigir; el llamador decide qué hacer.
-  async checkSession() {
-    try {
-      const response = await this.get(API_CONFIG.ENDPOINTS.TEST.PRIVATE);
-      return { valid: response?.success === true, user: response?.user || null };
-    } catch (error) {
-      // Sesión inválida o expirada
-      if (error.message === 'SESSION_EXPIRED') {
-        return { valid: false };
-      }
-      // Error de red: no sabemos el estado real de la sesión,
-      // asumir que sigue válida para no redirigir innecesariamente
-      if (error.message === 'NETWORK_ERROR') {
-        console.warn('checkSession: backend no disponible, se asume sesión local válida');
-        return { valid: true, offline: true };
-      }
-      return { valid: false };
-    }
   }
 
   post(endpoint, data) {
@@ -110,11 +86,44 @@ class ApiManager {
   }
 
   async login(correo, contraseña) {
-    return this.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, { correo, contraseña });
+    const response = await this.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, { correo, contraseña });
+    
+    // NUEVO: Guardar el token en localStorage
+    if (response.success && response.data.token) {
+      localStorage.setItem(API_CONFIG.STORAGE_KEYS.TOKEN, response.data.token);
+    }
+    
+    return response;
   }
 
   async logout() {
+    // Limpiar token del localStorage
+    localStorage.removeItem(API_CONFIG.STORAGE_KEYS.TOKEN);
+    
     return this.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {});
+  }
+
+  // Verificar si la sesión es válida
+  async checkSession() {
+    const token = localStorage.getItem(API_CONFIG.STORAGE_KEYS.TOKEN);
+    if (!token) {
+      return { valid: false, offline: false };
+    }
+    
+    try {
+      const response = await this.get(API_CONFIG.ENDPOINTS.TEST.PRIVATE);
+      return { valid: true, offline: false };
+    } catch (error) {
+      if (error.message === '401') {
+        // Token inválido o expirado
+        localStorage.removeItem(API_CONFIG.STORAGE_KEYS.TOKEN);
+        return { valid: false, offline: false };
+      }
+      if (error.message === 'NETWORK_ERROR') {
+        return { valid: true, offline: true };
+      }
+      return { valid: true, offline: true };
+    }
   }
 
   // ==================== ASESORIAS ====================

@@ -268,7 +268,7 @@ function manejarErrorSesion(error, tablaCuerpo, colspan) {
       </tr>
     `;
   }
-}
+} 
 
 // se ejecuta al cargar el DOM
 document.addEventListener('DOMContentLoaded', initDashboard);

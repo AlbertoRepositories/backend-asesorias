@@ -24,6 +24,8 @@ async function initBuscador() {
   }
 
   // se verifica la sesión en el backend SOLO si hay usuario en storage.
+
+  
   try {
     const sessionCheck = await apiManager.checkSession();
     if (!sessionCheck.valid) {

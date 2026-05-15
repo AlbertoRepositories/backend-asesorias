@@ -13,11 +13,12 @@ export const cookieOptions = {
 };
 
 // DESARROLLO LOCAL
-// sameSite: 'none' permite cookies entre orígenes distintos como localhost:5500 y localhost:5000.
-// secure: false está bien en HTTP local.
+// sameSite: 'lax' funciona en HTTP local sin necesitar secure: true.
+// sameSite: 'none' requiere FORZOSAMENTE secure: true (HTTPS), por eso el
+// navegador rechazaba la cookie silenciosamente y el backend respondía 401.
 export const cookieOptionsDev = {
   httpOnly: true,
   secure: false,
-  sameSite: 'none',
+  sameSite: 'lax',
   maxAge: 1 * 24 * 60 * 60 * 1000  // 1 día en milisegundos
 };

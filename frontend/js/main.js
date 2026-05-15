@@ -2,33 +2,29 @@
 // Este archivo se ejecuta en TODAS las paginas que lo incluyen
  
 // Paginas que requieren sesion activa para poder verlas
-// Si el usuario llega a estas sin haber hecho login, se le manda al index
+// NOMBRES REALES DE ARCHIVOS EN TU PROYECTO:
 const PAGINAS_PROTEGIDAS = [
   'dashboard.html',
   'notificaciones.html',
   'registro_asesoria.html',
-  'perfil.html',
+  'perfil_asesor.html',      // ← CORREGIDO: era 'perfil.html'
   'buscador.html'
 ];
  
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
  
   // Obtener el nombre del archivo actual (ej: "dashboard.html")
   const paginaActual = window.location.pathname.split('/').pop() || 'index.html';
  
-  // Si la pagina requiere sesion y no hay sesion activa -> intentar restaurar desde el backend
-  if (PAGINAS_PROTEGIDAS.includes(paginaActual) && !sessionManager.isSessionActive()) {
-    console.warn('Sesion requerida. No hay sesion local activa. Verificando backend...');
-    const sessionCheck = await apiManager.checkSession();
- 
-    if (sessionCheck.valid && sessionCheck.user) {
-      console.log('Sesion restaurada desde backend:', sessionCheck.user.nombre_usuario);
-      sessionManager.saveSession(sessionCheck.user);
-    } else {
-      console.warn('Sesion invalida o expirada. Redirigiendo al login...');
-      sessionManager.clearSession();
+  // Si la pagina requiere sesion
+  if (PAGINAS_PROTEGIDAS.includes(paginaActual)) {
+    
+    // CORRECCIÓN: Solo usar sesion local, NO hacer checkSession()
+    // checkSession() causaba un bucle infinito de redirecciones
+    if (!sessionManager.isSessionActive()) {
+      console.warn('Sesion requerida pero no hay datos locales. Redirigiendo al login...');
       window.location.href = 'index.html';
-      return; // Detener ejecucion para no intentar pintar la pagina
+      return;
     }
   }
  
