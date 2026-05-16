@@ -2,8 +2,8 @@
 // Define URLs base y constantes de la aplicacion
 
 const API_CONFIG = {
-  // URL base de la API
-  BASE_URL: 'http://localhost:5000/api',
+  // URL base de la API (Producción en Render)
+  BASE_URL: 'https://asesorias-1ns3.onrender.com/api',
 
   // Timeouts
   FETCH_TIMEOUT: 5000,
