@@ -29,8 +29,8 @@ const API_CONFIG = {
     },
     // Usuarios
     USERS: {
-      ME: '/users/me',
-      MATERIAS_INTERES: '/users/materias-interes'
+      PROFILE: '/users',
+      UPDATE: '/users'
     },
     // Asesorias
     ASESORIAS: {

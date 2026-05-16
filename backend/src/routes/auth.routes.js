@@ -1,6 +1,7 @@
 import express from 'express';
 import * as authController from '../controllers/auth.controller.js';
 import { validateRegister, validateLogin, handleValidationErrors } from '../utils/validators.js';
+import { requireAuth } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -24,3 +25,5 @@ router.post(
 router.post('/logout', authController.logout);
 
 export default router;
+router.get('/me', requireAuth, authController.obtenerPerfil);
+router.put('/materias-interes', requireAuth, authController.actualizarMateriasInteres);

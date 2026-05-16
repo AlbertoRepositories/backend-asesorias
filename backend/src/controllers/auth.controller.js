@@ -117,6 +117,11 @@ export const logout = async (req, res) => {
     const { maxAge, ...clearOptions } = options;
     res.clearCookie('authToken', clearOptions);
 
+    return res.status(200).json({
+      success: true,
+      message: 'Sesión cerrada correctamente'
+    });
+
   } catch (error) {
     console.error('Error en logout:', error);
     res.status(500).json({
@@ -125,4 +130,19 @@ export const logout = async (req, res) => {
       message: 'Error al cerrar sesión'
     });
   }
+};
+import User from '../models/User.js';
+
+export const actualizarMateriasInteres = async (req,res)=>{
+ try{
+  const user = await User.findByIdAndUpdate(req.user.id,{materias_interes:req.body.materias_interes||[]},{new:true}).populate('materias_interes','nombre');
+  res.status(200).json({success:true,data:user.materias_interes});
+ }catch(e){res.status(500).json({success:false,code:'SERVER_ERROR'})}
+};
+
+export const obtenerPerfil = async (req,res)=>{
+ try{
+ const user=await User.findById(req.user.id).populate('materias_interes','nombre');
+ res.status(200).json({success:true,data:user});
+ }catch(e){res.status(500).json({success:false})}
 };

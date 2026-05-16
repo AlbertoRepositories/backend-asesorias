@@ -38,7 +38,14 @@
         <li class="nav-item">
           <a class="nav-link" href="notificaciones.html">Notificaciones <i class="fas fa-bell"></i></a>
         </li>
-      </ul>
+      
+<li class="nav-item">
+  <a class="nav-link" href="#" id="btn-logout">
+    Cerrar sesión
+  </a>
+</li>
+</ul>
+
     </div>
   </nav>
 
@@ -107,7 +114,7 @@
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label class="form-label fw-bold"><i class="fas fa-chalkboard"></i> Modalidad</label>
-            <select class="form-select" required>
+            <select class="form-select" id="modalidad" required>
               <option value="">— Seleccione —</option>
               <option>Presencial</option>
               <option>Virtual</option>
@@ -115,7 +122,7 @@
           </div>
           <div class="col-md-6">
             <label class="form-label fw-bold"><i class="fas fa-map-marker-alt"></i> Ubicación / Enlace</label>
-            <input type="text" class="form-control" placeholder="Ej. Biblioteca, T-101 ó https://teams.microsoft.com/…" required>
+            <input type="text" class="form-control" id="ubicacion" placeholder="Ej. Biblioteca, T-101 ó https://teams.microsoft.com/…" required>
           </div>
         </div>
 

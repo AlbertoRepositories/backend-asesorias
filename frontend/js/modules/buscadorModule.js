@@ -1,10 +1,6 @@
 /**
  * buscadorModule.js
- * gestiona búsqueda, filtros y paginación de asesorías
- *
- * el botón "ver perfil del asesor" ahora construye la url con
- * ?id=<asesorId>&asesoriaId=<asesoriaId> para que evaluacionesModule.js
- * pueda identificar el asesor y la asesoría.
+ * gestiona la búsqueda, filtrado y paginación de las asesorías disponibles
  */
 
 // estado global del buscador
@@ -28,6 +24,8 @@ async function initBuscador() {
   }
 
   // se verifica la sesión en el backend SOLO si hay usuario en storage.
+
+  
   try {
     const sessionCheck = await apiManager.checkSession();
     if (!sessionCheck.valid) {
@@ -220,42 +218,37 @@ function renderizarTarjetas(asesorias) {
   });
 }
 
-// guardar el asesorId de la asesoría que se está mostrando en el modal
-// así se puede construir la url correcta al hacer clic en el perfil del asesor
-let _asesoriaActualEnModal = null;
-
 window.verDetallesAsesoria = async (id) => {
   try {
     const respuesta = await apiManager.get(`/asesorias/${id}`);
     if (respuesta.success) {
       const as = respuesta.data;
-      _asesoriaActualEnModal = as; // guardar para usar en el enlace de perfil
-
       const horario = new Date(as.horario);
 
       document.getElementById('modal-titulo').textContent      = as.asignaturaId?.nombre || 'Asesoría';
       document.getElementById('modal-asesor').textContent      = as.asesorId?.nombre_usuario || 'Desconocido';
       document.getElementById('modal-descripcion').textContent = as.descripcion || 'Sin descripción';
-      document.getElementById('modal-cupo').textContent        = `${as.cupo} lugares totales`;
+      const inscritos = as.inscritosActuales || 0;
+      const disponibles = as.cupo - inscritos;
+      document.getElementById('modal-cupo').textContent        = `${disponibles} de ${as.cupo} lugares disponibles`;
       document.getElementById('modal-horario').textContent     = horario.toLocaleString('es-MX');
       document.getElementById('modal-fecha').textContent       = horario.toLocaleDateString('es-MX');
       document.getElementById('modal-hora').textContent        = horario.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('modal-ubicacion').textContent   = as.ubicacion   || 'Por definir';
-      document.getElementById('modal-modalidad').textContent   = as.modalidad   || 'Por definir';
-      document.getElementById('modal-cupo-detalle').textContent = `${as.cupo} cupos disponibles`;
-
-      // construir url del perfil del asesor con ?id y ?asesoriaId
-      const asesorId  = as.asesorId?._id || as.asesorId || '';
-      const linkPerfil = document.getElementById('btn-ver-perfil-asesor');
-      if (linkPerfil && asesorId) {
-        linkPerfil.href = `perfil_asesor.html?id=${asesorId}&asesoriaId=${as._id}`;
-      }
+      document.getElementById('modal-ubicacion').textContent   = as.ubicacion || as.enlace || as.link || as.lugar || as.direccion || 'Por definir';
+      document.getElementById('modal-modalidad').textContent   = as.modalidad || as.tipo_modalidad || as.tipoModalidad || 'Por definir';
+      document.getElementById('modal-cupo-detalle').textContent = `${disponibles} cupos disponibles`;
+      const btnPerfil = document.getElementById('btn-ver-perfil');
+      if(btnPerfil){ btnPerfil.href = `perfil_asesor.html?asesorId=${as.asesorId?._id || ''}&asesoriaId=${as._id}`; }
+      const fin = new Date(horario.getTime() + ((as.duracionMin || 120) * 60000));
+      const finEl = document.getElementById('modal-hora-fin'); if(finEl){ finEl.textContent = fin.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});} 
 
       const btnInscribir = document.getElementById('btn-confirmar-inscripcion');
       if (btnInscribir) {
         btnInscribir.setAttribute('onclick', `ejecutarInscripcion('${as._id}')`);
         // Los asesores no se pueden inscribir
-        btnInscribir.disabled = sessionManager.getUserType() === 'asesor';
+        const yaInscrito = as.yaInscrito;
+        btnInscribir.disabled = sessionManager.getUserType() === 'asesor' || yaInscrito;
+        btnInscribir.textContent = yaInscrito ? 'Ya inscrito' : 'Inscribirme';
         btnInscribir.title    = sessionManager.getUserType() === 'asesor'
           ? 'Los asesores no pueden inscribirse' : '';
       }

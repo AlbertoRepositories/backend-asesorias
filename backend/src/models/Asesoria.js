@@ -25,6 +25,8 @@ const asesoriaSchema = new mongoose.Schema({
     type: Number,
     default: 120
   },
+  modalidad: { type: String, default: 'Por definir' },
+  ubicacion: { type: String, default: 'Por definir' },
   // Número máximo de usuarios que pueden inscribirse
   cupo: {
     type: Number,

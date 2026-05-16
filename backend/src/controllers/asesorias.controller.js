@@ -82,7 +82,7 @@ export const getAsesoriasPorAsesor = async (req, res, next) => {
 export const getAsesoriaById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const asesoria = await asesoriaService.getAsesoriaById(id);
+    const asesoria = await asesoriaService.getAsesoriaById(id, req.user?.id);
 
     if (!asesoria) {
       return res.status(404).json({

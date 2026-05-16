@@ -30,7 +30,6 @@ import inscripcionesRoutes from './routes/inscripciones.routes.js';
 import notificacionesRoutes from './routes/notificaciones.routes.js';
 import asesoriasRoutes from './routes/asesorias.routes.js';
 import asignaturasRoutes from './routes/asignaturas.routes.js';
-import usersRoutes from './routes/users.routes.js';
 
 // Importa middleware global de errores
 import { errorHandler } from './middlewares/error.middleware.js';
@@ -75,9 +74,6 @@ app.use('/api/asesorias', asesoriasRoutes);
 
 // Ruta para asignaturas (materias disponibles)
 app.use('/api/asignaturas', asignaturasRoutes);
-
-// Ruta para usuarios
-app.use('/api/users', usersRoutes);
 
 // ========== RUTA BASE ==========
 

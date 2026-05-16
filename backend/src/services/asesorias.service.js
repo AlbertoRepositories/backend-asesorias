@@ -4,7 +4,7 @@ import * as notificacionService from './notificaciones.service.js';
 
 // Función para crear una nueva asesoría
 export const crearAsesoria = async (asesorId, data) => {
-  const { asignaturaId, descripcion, horario, duracionMin, cupo } = data;
+  const { asignaturaId, descripcion, horario, duracionMin, cupo, modalidad, ubicacion } = data;
 
   // Validación: No se puede registrar una asesoría en una fecha pasada
   if (new Date(horario) < new Date()) {
@@ -31,6 +31,8 @@ export const crearAsesoria = async (asesorId, data) => {
     horario,
     duracionMin: duracionMin || 120,
     cupo,
+    modalidad,
+    ubicacion,
     estado: 'disponible'
   });
 
@@ -91,12 +93,12 @@ export const getAsesorias = async (filtros, page = 1, limit = 8) => {
 
 // Función para obtener las asesorías creadas por un asesor específico
 export const getAsesoriasPorAsesor = async (asesorId) => {
-  return await Asesoria.find({ asesorId }).populate('asignaturaId', 'nombre');
+  return await Asesoria.find({ asesorId }).populate('asignaturaId', 'nombre').populate('asesorId', 'nombre_usuario correo calificacion');
 };
 
 // Función para editar una asesoría existente
 export const editarAsesoria = async (asesoriaId, data) => {
-  const { descripcion, horario, duracionMin, cupo } = data;
+  const { descripcion, horario, duracionMin, cupo, modalidad, ubicacion } = data;
 
   // Si se cambia el horario, validamos que no sea en el pasado
   if (horario && new Date(horario) < new Date()) {
@@ -111,7 +113,7 @@ export const editarAsesoria = async (asesoriaId, data) => {
 
   const asesoriaActualizada = await Asesoria.findByIdAndUpdate(
     asesoriaId,
-    { descripcion, horario, duracionMin, cupo },
+    { descripcion, horario, duracionMin, cupo, modalidad, ubicacion },
     { new: true, runValidators: true }
   );
 
@@ -181,8 +183,12 @@ export const cancelarAsesoria = async (asesoriaId) => {
 }
 
 // Función para obtener detalles de una asesoría por ID
-export const getAsesoriaById = async (id) => {
-  return await Asesoria.findById(id)
-    .populate('asesorId', 'nombre_usuario calificacion')
+export const getAsesoriaById = async (id,userId=null) => {
+  const asesoria = await Asesoria.findById(id)
+    .populate('asesorId', 'nombre_usuario correo calificacion')
     .populate('asignaturaId', 'nombre');
+  const inscritosActuales = await Inscripcion.countDocuments({asesoriaId:id,estado:'activa'});
+  asesoria._doc.inscritosActuales = inscritosActuales;
+  if(userId){ asesoria._doc.yaInscrito = !!(await Inscripcion.findOne({usuarioId:userId,asesoriaId:id,estado:'activa'})); }
+  return asesoria;
 };

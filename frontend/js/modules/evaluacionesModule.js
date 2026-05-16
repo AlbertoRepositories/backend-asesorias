@@ -1,10 +1,16 @@
-// evaluacionesModule.js — lógica para perfil_asesor.html
+// ============================================================
+// evaluacionesModule.js — lógica para perfil.html
 //
 // Esta página es el "Perfil del Asesor":
 //   - Muestra el nombre, calificación y asesorías de UN asesor
 //   - Si quien visita es un ASESORADO → ve el formulario de evaluación
 //   - Si quien visita es el PROPIO ASESOR → ve un mensaje en lugar del formulario
 //
+// URL esperada:
+//   perfil.html?id=<asesorId>              → perfil del asesor con ese ID
+//   perfil.html?id=<id>&asesoriaId=<id>   → además vincula una asesoría para evaluar
+//   perfil.html                            → muestra el perfil del asesor logueado (si lo hay)
+// ============================================================
 
 let calificacionSeleccionada = 0;  // Estrella elegida por el usuario
 let asesorIdActual   = null;        // ID del asesor cuyo perfil se muestra
@@ -12,40 +18,44 @@ let asesoriaIdEval   = null;        // ID de la asesoría a evaluar (opcional)
 let esMiPerfil       = false;       // ¿El usuario logueado está viendo su propio perfil?
 
 // ── INICIO ───────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', function () {
 
   // Leer parámetros de la URL
-  const params   = new URLSearchParams(window.location.search);
-  asesorIdActual = params.get('id');
-  asesoriaIdEval = params.get('asesoriaId');
+  const params    = new URLSearchParams(window.location.search);
+  asesorIdActual  = params.get('asesorId') || params.get('id');
+  asesoriaIdEval  = params.get('asesoriaId');
 
   const usuario = sessionManager.isSessionActive() ? sessionManager.getUser() : null;
 
-  // si no viene ?id= en la URL, se usa el del usuario logueado
+  // Si no viene ?id= en la URL, usamos el del usuario logueado
   if (!asesorIdActual && usuario) {
     asesorIdActual = usuario._id;
   }
 
+  // Comparar para saber si el asesor que se muestra ES el usuario logueado
   if (usuario && asesorIdActual === usuario._id) {
     esMiPerfil = true;
   }
 
   if (!asesorIdActual) {
+    // No hay ID → mostrar mensaje de error
     mostrarError('No se proporcionó un ID de asesor. Agrega ?id=<id> a la URL.');
     return;
   }
 
-  // Si estoy viendo mi propio perfil, cargo mis datos locales inmediatamente
+  // Si es mi propio perfil, mostrar los datos locales de sesión inmediatamente
   if (esMiPerfil && usuario) {
     mostrarDatosPerfil(usuario.nombre_usuario, usuario.calificacion);
+    // Mostrar botón de "Nueva asesoría" (solo para el asesor en su propio perfil)
     const btnBox = document.getElementById('botonesAsesorPropios');
     if (btnBox) btnBox.style.display = '';
   }
 
+  // Decidir qué mostrar en la sección de evaluación
   configurarSeccionEvaluacion(usuario);
 
-  // cargar asesorías y luego obtener los datos del perfil si hacen falta
-  await cargarAsesorias(asesorIdActual);
+  // Cargar las asesorías del asesor desde el backend
+  cargarAsesorias(asesorIdActual);
 });
 
 // ── CONFIGURAR SECCIÓN DE EVALUACIÓN ─────────────────────────
@@ -61,6 +71,7 @@ function configurarSeccionEvaluacion(usuario) {
   const esAsesor    = usuario && usuario.tipo_usuario === 'asesor';
 
   if (esMiPerfil && esAsesor) {
+    // Asesor viendo su propio perfil → reemplazar con mensaje
     seccion.innerHTML = `
       <div class="own-profile-msg">
         <i class="fas fa-info-circle fa-2x mb-3 d-block" style="color:#4338ca;"></i>
@@ -72,6 +83,7 @@ function configurarSeccionEvaluacion(usuario) {
       </div>
     `;
   } else if (esAsesorado && !esMiPerfil) {
+    // Asesorado viendo el perfil de otro → activar estrellas
     configurarEstrellas();
   } else {
     // Cualquier otro caso (asesor viendo perfil de otro asesor, sin sesión, etc.)
@@ -81,14 +93,17 @@ function configurarSeccionEvaluacion(usuario) {
 
 // ── MOSTRAR DATOS DEL ASESOR EN EL DOM ───────────────────────
 function mostrarDatosPerfil(nombre, calificacion) {
+  // Avatar con la primera letra del nombre
   const avatarEl = document.getElementById('avatarInicial');
   if (avatarEl && nombre) {
     avatarEl.textContent = nombre.charAt(0).toUpperCase();
   }
 
+  // Nombre
   const nombreEl = document.getElementById('nombreAsesor');
   if (nombreEl) nombreEl.textContent = nombre || 'Asesor';
 
+  // Estrellas de calificación
   const estEl = document.getElementById('calificacionEstrellas');
   const numEl = document.getElementById('calificacionNum');
 
@@ -118,7 +133,7 @@ async function cargarAsesorias(asesorId) {
 
     if (!respuesta.success) throw new Error('Sin datos');
 
-    const todas       = respuesta.data;
+    const todas      = respuesta.data;
     const disponibles = todas.filter(a => a.estado === 'disponible');
 
     // Actualizar estadísticas
@@ -127,14 +142,12 @@ async function cargarAsesorias(asesorId) {
     if (statTotal) statTotal.textContent = todas.length;
     if (statDisp)  statDisp.textContent  = disponibles.length;
 
-    // obtener datos del asesor del primer resultado si no es mi perfil
-    if (!esMiPerfil) {
-      if (todas.length > 0 && todas[0].asesorId && typeof todas[0].asesorId === 'object') {
-        const asesorData = todas[0].asesorId;
+    // Si no somos el asesor en sesión, obtener los datos del asesor desde la respuesta
+    if (!esMiPerfil && todas.length > 0) {
+      const primera = todas[0];
+      if (primera.asesorId && typeof primera.asesorId === 'object') {
+        const asesorData = primera.asesorId;
         mostrarDatosPerfil(asesorData.nombre_usuario, asesorData.calificacion);
-      } else if (todas.length === 0) {
-        // Sin asesorías: intentar obtener nombre desde evaluaciones
-        await cargarNombreDesdeEvaluaciones(asesorId);
       }
     }
 
@@ -190,29 +203,6 @@ async function cargarAsesorias(asesorId) {
 }
 
 // ── ESTRELLAS INTERACTIVAS ────────────────────────────────────
-// fallback para mostrar nombre del asesor cuando no tiene asesorías
-async function cargarNombreDesdeEvaluaciones(asesorId) {
-  try {
-    const respEval = await apiManager.getAdvisorEvaluations(asesorId);
-    if (respEval.success && respEval.data.length > 0) {
-      // Las evaluaciones tienen asesorId poblado
-      const ev = respEval.data[0];
-      if (ev.asesorId && typeof ev.asesorId === 'object') {
-        mostrarDatosPerfil(ev.asesorId.nombre_usuario, ev.asesorId.calificacion);
-        return;
-      }
-    }
-    // Si tampoco hay evaluaciones, dejar los valores por defecto del HTML
-    const nombreEl = document.getElementById('nombreAsesor');
-    if (nombreEl && nombreEl.textContent === 'Cargando...') {
-      nombreEl.textContent = 'Asesor';
-    }
-  } catch (_) {
-    // Silencioso — no es crítico
-  }
-}
-
-// estrellas interactivas
 function configurarEstrellas() {
   const stars = document.querySelectorAll('.star');
 
@@ -243,13 +233,14 @@ function configurarEstrellas() {
 
 // ── ENVIAR EVALUACIÓN ─────────────────────────────────────────
 // Ruta del backend: POST /api/evaluaciones
-// enviar evaluación
 async function enviarEvaluacion() {
+  // Verificar que no es su propio perfil
   if (esMiPerfil) {
     alert('No puedes evaluarte a ti mismo');
     return;
   }
 
+  // Verificar que se eligió una calificación
   if (calificacionSeleccionada === 0) {
     alert('Selecciona una calificación con las estrellas antes de enviar');
     return;
@@ -260,22 +251,20 @@ async function enviarEvaluacion() {
     return;
   }
 
-  // el campo asesoriaId es obligatorio en el backend y valida la inscripción
-  // si no viene en la url, mostramos un aviso en vez de enviar un request fallido
-  if (!asesoriaIdEval) {
-    alert('Para evaluar a un asesor debes acceder desde una asesoría en la que estés inscrito. Ve al Dashboard y haz clic en el nombre del asesor desde tu tabla de asesorías agendadas.');
-    return;
-  }
-
+  // Leer el comentario (opcional)
   const comentario = document.getElementById('comentario').value.trim();
 
+  // Datos que pide el backend
   const datos = {
-    asesorId:    asesorIdActual,
-    asesoriaId:  asesoriaIdEval,
+    id_asesor:    asesorIdActual,
     calificacion: calificacionSeleccionada,
-    comentario:  comentario || undefined
+    comentario:   comentario || 'Sin comentario'
   };
 
+  // Agregar asesoriaId solo si viene en la URL
+  if (asesoriaIdEval) datos.id_asesoria = asesoriaIdEval;
+
+  // Deshabilitar botón mientras se procesa
   const btn = document.querySelector('button[onclick="enviarEvaluacion()"]');
   if (btn) {
     btn.disabled = true;
@@ -288,6 +277,7 @@ async function enviarEvaluacion() {
     if (respuesta.success) {
       alert('¡Gracias! Tu evaluación fue enviada correctamente.');
 
+      // Limpiar formulario
       calificacionSeleccionada = 0;
       document.querySelectorAll('.star').forEach(s => {
         s.classList.remove('active');
@@ -295,13 +285,13 @@ async function enviarEvaluacion() {
       });
       document.getElementById('comentario').value = '';
 
+      // Recargar asesorías para reflejar la nueva calificación
       cargarAsesorias(asesorIdActual);
     }
 
   } catch (error) {
     if      (error.message.includes('409')) alert('Ya evaluaste a este asesor en esta asesoría');
-    else if (error.message.includes('400')) alert('No estás inscrito a esta asesoría o los datos son inválidos');
-    else if (error.message.includes('403')) alert('Solo los asesorados pueden enviar evaluaciones');
+    else if (error.message.includes('403')) alert('Solo puedes evaluar asesorías en las que estuviste inscrito');
     else if (error.message.includes('404')) alert('La asesoría o el asesor no fue encontrado');
     else                                    alert('Error al enviar la evaluación: ' + error.message);
     console.error(error);
@@ -321,5 +311,46 @@ function mostrarError(mensaje) {
   if (nombreEl) nombreEl.textContent = 'No disponible';
 }
 
-// exponer para onclick en el HTML
-window.enviarEvaluacion = enviarEvaluacion;
+// ===== FUNCIONALIDAD SEGUIR / DEJAR DE SEGUIR =====
+async function toggleSeguirAsesor() {
+  const btn = document.getElementById('btnSeguirAsesor');
+  if (!btn || !asesorIdActual) return;
+
+  try {
+    const siguiendo = btn.dataset.siguiendo === 'true';
+
+    const endpoint = siguiendo
+      ? `/seguidores/dejar-seguir/${asesorIdActual}`
+      : `/seguidores/seguir/${asesorIdActual}`;
+
+    await apiManager.post(endpoint, {});
+
+    btn.dataset.siguiendo = (!siguiendo).toString();
+    btn.textContent = siguiendo ? 'Seguir asesor' : 'Dejar de seguir';
+
+    alert(siguiendo
+      ? 'Has dejado de seguir al asesor'
+      : 'Ahora sigues a este asesor');
+
+  } catch (error) {
+    console.error(error);
+    alert('No se pudo actualizar el seguimiento');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btnSeguirAsesor');
+  if (btn) {
+    btn.addEventListener('click', toggleSeguirAsesor);
+  }
+});
+
+// ===== MODAL DE DETALLES DESDE PERFIL =====
+function verDetallesAsesoriaPerfil(asesoriaId) {
+  if (window.mostrarDetallesAsesoria) {
+    window.mostrarDetallesAsesoria(asesoriaId);
+    return;
+  }
+
+  window.location.href = `buscador.html?asesoria=${asesoriaId}`;
+}

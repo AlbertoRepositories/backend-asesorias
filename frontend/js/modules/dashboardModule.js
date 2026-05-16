@@ -1,38 +1,54 @@
 /**
  * dashboardModule.js
  * gestiona la carga dinámica del dashboard según el rol del usuario
+ * muestra sección de asesor O sección de asesorado, nunca ambas
  */
 
 async function initDashboard() {
   const user = sessionManager.getUser();
 
+  // si no hay sesión activa al cargar el dashboard,
+  // se redirige al login en lugar de intentar llamar al backend sin cookie.
   if (!user) {
     console.warn('Sin sesión activa en dashboard. Redirigiendo...');
     window.location.href = 'index.html';
     return;
   }
 
+  // se muestra el nombre del usuario en la bienvenida (si el elemento existe)
   const bienvenidaEl = document.getElementById('bienvenida-usuario');
   if (bienvenidaEl) {
     bienvenidaEl.textContent = `Bienvenido/a, ${user.nombre_usuario}`;
   }
 
+  // se ocultan AMBAS secciones por defecto desde JS,
+  // así el HTML puede tener las dos visibles para maquetación
+  // sin que el usuario las vea antes de que se decida cuál mostrar.
   const seccionAsesor    = document.getElementById('seccion-asesor');
   const seccionAsesorado = document.getElementById('seccion-asesorado');
 
   if (seccionAsesor)    seccionAsesor.style.display    = 'none';
   if (seccionAsesorado) seccionAsesorado.style.display = 'none';
 
+
+  // ocultar buscador para asesores
+  const navBuscador = document.getElementById('nav-link-buscador');
+
+  if (user.tipo_usuario === 'asesor' && navBuscador) {
+    navBuscador.style.display = 'none';
+  }
+
   if (user.tipo_usuario === 'asesor') {
+    // -- VISTA DEL ASESOR --
     if (seccionAsesor) seccionAsesor.style.display = 'block';
     await cargarAsesoriasDelAsesor();
     await cargarNotificacionesDashboard('seccion-asesor');
   } else {
+    // -- VISTA DEL ASESORADO --
     if (seccionAsesorado) seccionAsesorado.style.display = 'block';
     await cargarMisInscripciones();
-    await cargarNotificacionesDashboard('seccion-asesorado');
-    // cargar materias de interés del asesorado
     await cargarMateriasInteres();
+    await cargarNotificacionesDashboard('seccion-asesorado');
   }
 }
 
@@ -41,7 +57,6 @@ async function initDashboard() {
  * las inyecta en la tabla #tabla-asesorias-asesor del HTML.
  * uso de GET /api/asesorias/asesor/:id
  */
-// ASESOR: sus asesorías
 async function cargarAsesoriasDelAsesor() {
   const tablaCuerpo = document.querySelector('#tabla-asesorias-asesor tbody');
   if (!tablaCuerpo) return;
@@ -58,12 +73,12 @@ async function cargarAsesoriasDelAsesor() {
     }
 
     tablaCuerpo.innerHTML = respuesta.data.map(asesoria => {
-      const fecha = new Date(asesoria.horario).toLocaleString('es-MX', {
+      const fecha          = new Date(asesoria.horario).toLocaleString('es-MX', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
       });
-      const nombreMateria = asesoria.asignaturaId?.nombre || 'Sin materia';
-      const estadoBadge   = {
+      const nombreMateria  = asesoria.asignaturaId?.nombre || 'Sin materia';
+      const estadoBadge    = {
         disponible: 'bg-success',
         lleno:      'bg-warning text-dark',
         cancelado:  'bg-danger',
@@ -100,18 +115,17 @@ async function cargarAsesoriasDelAsesor() {
  * las inyecta en la tabla #tabla-inscripciones del HTML.
  * uso de GET /api/inscripciones/mis-asesorias
  */
-// asesorado: sus inscripciones
 async function cargarMisInscripciones() {
   const tablaCuerpo = document.querySelector('#tabla-inscripciones tbody');
   if (!tablaCuerpo) return;
 
-  tablaCuerpo.innerHTML = '<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+  tablaCuerpo.innerHTML = '<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
 
   try {
     const respuesta = await apiManager.getMyEnrollments();
 
     if (!respuesta.success || respuesta.data.length === 0) {
-      tablaCuerpo.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No tienes asesorías agendadas.</td></tr>';
+      tablaCuerpo.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No tienes asesorías agendadas.</td></tr>';
       return;
     }
 
@@ -119,24 +133,18 @@ async function cargarMisInscripciones() {
       const a = inscripcion.asesoriaId;
       if (!a) return '';
 
-      const fecha = new Date(a.horario).toLocaleString('es-MX', {
+      const fecha         = new Date(a.horario).toLocaleString('es-MX', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
       });
-      const nombreMateria = a.asignaturaId?.nombre     || 'Sin materia';
-      const nombreAsesor  = a.asesorId?.nombre_usuario || 'Asesor';
-      const asesorId      = a.asesorId?._id            || '';
+      const nombreMateria = a.asignaturaId?.nombre        || 'Sin materia';
+      const nombreAsesor  = a.asesorId?.nombre_usuario    || 'Asesor';
 
       return `
         <tr id="fila-${inscripcion._id}">
           <td>${nombreMateria}</td>
           <td>${fecha}</td>
-          <td>
-            ${asesorId
-              ? `<a href="perfil_asesor.html?id=${asesorId}&asesoriaId=${a._id}" class="text-primary">${nombreAsesor}</a>`
-              : nombreAsesor
-            }
-          </td>
+          <td>${nombreAsesor}</td><td><button class='btn btn-sm btn-info' onclick="verDetallesAsesoria('${a._id}')">Ver detalles</button></td>
           <td>
             <button class="btn btn-sm btn-danger"
                     onclick="confirmarDesinscripcion('${inscripcion._id}')">
@@ -157,126 +165,6 @@ async function cargarMisInscripciones() {
  * en el mini-panel del dashboard (columna lateral).
  * uso de GET /api/notificaciones
  */
-// ASESORADO: materias de interés
-
-// estado local de las materias seleccionadas en el modal
-let _todasLasMaterias    = [];  // catálogo completo de asignaturas
-let _materiasSeleccionadas = []; // IDs actualmente guardados
-
-async function cargarMateriasInteres() {
-  const contenedor = document.getElementById('contenedor-materias-interes');
-  if (!contenedor) return;
-
-  try {
-    // se cargan los datos del usuario (con materias_interes)
-    const respMe = await apiManager.getMe();
-    if (!respMe.success) return;
-
-    const materiasGuardadas = respMe.data.materias_interes || [];
-    _materiasSeleccionadas  = materiasGuardadas.map(m => m._id || m);
-
-    renderizarMateriasInteres(materiasGuardadas, contenedor);
-
-  } catch (error) {
-    console.warn('No se pudieron cargar las materias de interés:', error.message);
-    contenedor.innerHTML = '<p class="text-muted small">No disponible.</p>';
-  }
-}
-
-function renderizarMateriasInteres(materias, contenedor) {
-  if (materias.length === 0) {
-    contenedor.innerHTML = `
-      <p class="text-muted small mb-2">Aún no has seleccionado materias de interés.</p>
-    `;
-  } else {
-    contenedor.innerHTML = materias.map(m =>
-      `<span class="badge bg-primary me-1 mb-1">${m.nombre || m}</span>`
-    ).join('');
-  }
-}
-
-// se abre el modal de materias de interés y carga el catálogo de asignaturas
-window.abrirModalMateriasInteres = async function () {
-  const lista = document.getElementById('lista-materias-modal');
-  if (!lista) return;
-
-  lista.innerHTML = '<div class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Cargando materias...</div>';
-
-  // Abrir el modal de Bootstrap
-  const modal = new bootstrap.Modal(document.getElementById('modalMateriasInteres'));
-  modal.show();
-
-  try {
-    // se cargar el catálogo de asignaturas si aún no se tiene
-    if (_todasLasMaterias.length === 0) {
-      const respAsig = await apiManager.get('/asignaturas');
-      _todasLasMaterias = respAsig.success ? respAsig.data : [];
-    }
-
-    // se construyen los checkboxes
-    lista.innerHTML = _todasLasMaterias.map(materia => {
-      const checado = _materiasSeleccionadas.includes(materia._id) ? 'checked' : '';
-      return `
-        <div class="form-check mb-2">
-          <input class="form-check-input materia-checkbox" type="checkbox"
-                 value="${materia._id}" id="mat-${materia._id}" ${checado}>
-          <label class="form-check-label" for="mat-${materia._id}">
-            ${materia.nombre}
-            ${materia.descripcion_asignatura
-              ? `<small class="text-muted d-block">${materia.descripcion_asignatura}</small>`
-              : ''}
-          </label>
-        </div>
-      `;
-    }).join('');
-
-  } catch (error) {
-    lista.innerHTML = '<p class="text-danger">Error al cargar las materias. Intenta de nuevo.</p>';
-    console.error(error);
-  }
-};
-
-// Guarda las materias seleccionadas en el modal
-window.guardarMateriasInteres = async function () {
-  const checkboxes = document.querySelectorAll('.materia-checkbox:checked');
-  const nuevosIds  = Array.from(checkboxes).map(cb => cb.value);
-
-  const btnGuardar = document.getElementById('btn-guardar-materias');
-  if (btnGuardar) {
-    btnGuardar.disabled = true;
-    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Guardando...';
-  }
-
-  try {
-    const respuesta = await apiManager.updateMateriasInteres(nuevosIds);
-
-    if (respuesta.success) {
-      // se actualiza el estado local
-      _materiasSeleccionadas = nuevosIds;
-
-      // se cierra el modal
-      const modalEl = document.getElementById('modalMateriasInteres');
-      bootstrap.Modal.getInstance(modalEl)?.hide();
-
-      // se renderiza la lista en el dashboard usando los nombres del catálogo
-      const materiasConNombre = _todasLasMaterias.filter(m => nuevosIds.includes(m._id));
-      const contenedor = document.getElementById('contenedor-materias-interes');
-      if (contenedor) renderizarMateriasInteres(materiasConNombre, contenedor);
-
-      alert('¡Materias de interés actualizadas!');
-    }
-  } catch (error) {
-    alert('Error al guardar las materias: ' + error.message);
-    console.error(error);
-  } finally {
-    if (btnGuardar) {
-      btnGuardar.disabled = false;
-      btnGuardar.innerHTML = '<i class="fas fa-save me-1"></i>Guardar';
-    }
-  }
-};
-
-// notificaciones en el mini-panel del dashboard
 async function cargarNotificacionesDashboard(seccionId) {
   // se busca el contenedor de notificaciones DENTRO de la sección activa
   const seccion    = document.getElementById(seccionId);
@@ -304,7 +192,7 @@ async function cargarNotificacionesDashboard(seccionId) {
     contenedor.innerHTML = noLeidas.map(n => `
       <p class="mb-2">
         🔔 <strong>${n.titulo}</strong><br>
-        <small class="text-muted">${(n.descripcion || '').substring(0, 80)}...</small>
+        <small class="text-muted">${n.descripcion?.substring(0, 80)}...</small>
       </p>
     `).join('<hr class="my-2">');
 
@@ -333,7 +221,7 @@ window.confirmarDesinscripcion = async (inscripcionId) => {
       // si la tabla quedó vacía, mostrar mensaje
       const tablaCuerpo = document.querySelector('#tabla-inscripciones tbody');
       if (tablaCuerpo && tablaCuerpo.children.length === 0) {
-        tablaCuerpo.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No tienes asesorías agendadas.</td></tr>';
+        tablaCuerpo.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No tienes asesorías agendadas.</td></tr>';
       }
 
       alert('Te has desinscrito correctamente.');
@@ -375,6 +263,7 @@ window.confirmarCancelacionAsesoria = async (asesoriaId) => {
  */
 function manejarErrorSesion(error, tablaCuerpo, colspan) {
   if (error.message.includes('401')) {
+    // Sesión expirada → limpiar datos locales y redirigir al login
     sessionManager.clearSession();
     alert('Tu sesión ha expirado. Por favor inicia sesión de nuevo.');
     window.location.href = 'index.html';
@@ -388,6 +277,29 @@ function manejarErrorSesion(error, tablaCuerpo, colspan) {
       </tr>
     `;
   }
+} 
+
+// se ejecuta al cargar el DOM
+document.addEventListener('DOMContentLoaded', initDashboard);
+async function cargarMateriasInteres(){
+ const cont=document.getElementById('materias-interes-container');
+ if(!cont) return;
+ const mats=await apiManager.get('/asignaturas');
+ const perfil=await apiManager.get('/auth/me');
+ const ids=(perfil.data.materias_interes||[]).map(m=>m._id);
+ cont.innerHTML=mats.data.map(m=>`<div class='form-check'><input class='form-check-input materia-check' type='checkbox' value='${m._id}' ${ids.includes(m._id)?'checked':''}><label class='form-check-label'>${m.nombre}</label></div>`).join('');
+ document.getElementById('guardar-materias-btn')?.addEventListener('click',async()=>{
+ const vals=[...document.querySelectorAll('.materia-check:checked')].map(c=>c.value);
+ await apiManager.put('/auth/materias-interes',{materias_interes:vals});
+ alert('Materias de interés guardadas');
+ });
 }
 
-document.addEventListener('DOMContentLoaded', initDashboard);
+
+// FIX modalidad y ubicación
+window.obtenerModalidadTexto = function(asesoria){
+  return asesoria.modalidad || asesoria.tipo_modalidad || asesoria.modalidad_nombre || 'Virtual';
+}
+window.obtenerUbicacionTexto = function(asesoria){
+  return asesoria.ubicacion || asesoria.lugar || asesoria.direccion || 'Pendiente';
+}
