@@ -18,7 +18,8 @@ const corsOptions = {
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'http://localhost',
-    'https://backend-asesorias.onrender.com' // Dominio real de tu frontend en Render
+    'https://asesorias-1ns3.onrender.com',
+    'https://backend-asesorias.onrender.com'
   ],
 
   // Permite el envio de cookies y headers de autenticacion
