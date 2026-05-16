@@ -1,12 +1,11 @@
 // Gestor centralizado de todas las peticiones HTTP
-// CORREGIDO: Token se guarda en localStorage y se envía en Authorization header
+// Token se guarda en localStorage y se envía en Authorization header
 
 class ApiManager {
 
   // Realiza una petición HTTP genérica
   async request(endpoint, options = {}) {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
-
     // Obtener el token del localStorage (si existe)
     const token = localStorage.getItem(API_CONFIG.STORAGE_KEYS.TOKEN);
 
@@ -41,7 +40,6 @@ class ApiManager {
       if (/^\d{3}$/.test(error.message)) {
         throw error;
       }
-
       // Error de red
       console.error('Error en request:', error.message);
       throw new Error('NETWORK_ERROR');
@@ -87,19 +85,15 @@ class ApiManager {
 
   async login(correo, contraseña) {
     const response = await this.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, { correo, contraseña });
-    
-    // NUEVO: Guardar el token en localStorage
     if (response.success && response.data.token) {
       localStorage.setItem(API_CONFIG.STORAGE_KEYS.TOKEN, response.data.token);
     }
-    
     return response;
   }
 
   async logout() {
     // Limpiar token del localStorage
     localStorage.removeItem(API_CONFIG.STORAGE_KEYS.TOKEN);
-    
     return this.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {});
   }
 
@@ -109,9 +103,8 @@ class ApiManager {
     if (!token) {
       return { valid: false, offline: false };
     }
-    
     try {
-      const response = await this.get(API_CONFIG.ENDPOINTS.TEST.PRIVATE);
+      await this.get(API_CONFIG.ENDPOINTS.TEST.PRIVATE);
       return { valid: true, offline: false };
     } catch (error) {
       if (error.message === '401') {
@@ -124,6 +117,20 @@ class ApiManager {
       }
       return { valid: true, offline: true };
     }
+  }
+
+  // ==================== USUARIOS ====================
+
+  // devuelve datos completos del usuario con materias de interés pobladas
+  async getMe() {
+    return this.get(API_CONFIG.ENDPOINTS.USERS.ME);
+  }
+
+  // guarda arreglo de ids de materias de interés
+  async updateMateriasInteres(materiasIds) {
+    return this.patch(API_CONFIG.ENDPOINTS.USERS.MATERIAS_INTERES, {
+      materias_interes: materiasIds
+    });
   }
 
   // ==================== ASESORIAS ====================

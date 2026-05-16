@@ -1,6 +1,10 @@
 /**
  * buscadorModule.js
- * gestiona la búsqueda, filtrado y paginación de las asesorías disponibles
+ * gestiona búsqueda, filtros y paginación de asesorías
+ *
+ * el botón "ver perfil del asesor" ahora construye la url con
+ * ?id=<asesorId>&asesoriaId=<asesoriaId> para que evaluacionesModule.js
+ * pueda identificar el asesor y la asesoría.
  */
 
 // estado global del buscador
@@ -24,8 +28,6 @@ async function initBuscador() {
   }
 
   // se verifica la sesión en el backend SOLO si hay usuario en storage.
-
-  
   try {
     const sessionCheck = await apiManager.checkSession();
     if (!sessionCheck.valid) {
@@ -218,11 +220,17 @@ function renderizarTarjetas(asesorias) {
   });
 }
 
+// guardar el asesorId de la asesoría que se está mostrando en el modal
+// así se puede construir la url correcta al hacer clic en el perfil del asesor
+let _asesoriaActualEnModal = null;
+
 window.verDetallesAsesoria = async (id) => {
   try {
     const respuesta = await apiManager.get(`/asesorias/${id}`);
     if (respuesta.success) {
       const as = respuesta.data;
+      _asesoriaActualEnModal = as; // guardar para usar en el enlace de perfil
+
       const horario = new Date(as.horario);
 
       document.getElementById('modal-titulo').textContent      = as.asignaturaId?.nombre || 'Asesoría';
@@ -235,6 +243,13 @@ window.verDetallesAsesoria = async (id) => {
       document.getElementById('modal-ubicacion').textContent   = as.ubicacion   || 'Por definir';
       document.getElementById('modal-modalidad').textContent   = as.modalidad   || 'Por definir';
       document.getElementById('modal-cupo-detalle').textContent = `${as.cupo} cupos disponibles`;
+
+      // construir url del perfil del asesor con ?id y ?asesoriaId
+      const asesorId  = as.asesorId?._id || as.asesorId || '';
+      const linkPerfil = document.getElementById('btn-ver-perfil-asesor');
+      if (linkPerfil && asesorId) {
+        linkPerfil.href = `perfil_asesor.html?id=${asesorId}&asesoriaId=${as._id}`;
+      }
 
       const btnInscribir = document.getElementById('btn-confirmar-inscripcion');
       if (btnInscribir) {
