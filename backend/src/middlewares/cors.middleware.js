@@ -5,20 +5,21 @@ import cors from 'cors';
 // Esto previene ataques Cross-Origin Resource Sharing mientras permite
 // que el frontend se comunique con el backend
 const corsOptions = {
-  // Lista blanca de origenes permitidos
-  // Incluye localhost para desarrollo local
+  // Lista blanca de origenes permitidos de forma manual y explícita
   origin: [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'http://localhost:5000',
-  'http://127.0.0.1:5000',
-  'http://localhost:5500',      // ← AGREGAR: Live Server
-  'http://127.0.0.1:5500',     // ← AGREGAR: Live Server (IP)
-  'http://localhost:5501',      // ← AGREGAR: Live Server (alternativo)
-  'http://127.0.0.1:5501',     // ← AGREGAR
-  'http://localhost:8000',
-  'http://127.0.0.1:8000'
-],
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'http://localhost:5501',
+    'http://127.0.0.1:5501',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost',
+    'https://asesorias-frontend.onrender.com' // ← REEMPLAZAR por tu URL exacta de Render
+  ],
 
   // Permite el envio de cookies y headers de autenticacion
   credentials: true,
