@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>Notificaciones</title>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+
+    <!-- Google Font (más elegante) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link 
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" 
+      rel="stylesheet"
+    >
+
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous"
+    />
+
+    <!-- Common CSS - Estilos compartidos -->
+    <link rel="stylesheet" href="css/common.css">
+
+    <style>
+        .section-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.75rem;
+        }
+
+        .card-notificacion {
+            background: var(--glass);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-left: 6px solid var(--success);
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: #1f2937;
+        }
+
+        .card-notificacion:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header-icon {
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2ff;
+            border-radius: 12px;
+            font-size: 1.2rem;
+        }
+
+        .badge-soft {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .card.leida {
+            background: #e2e8f0;
+            border-left: 6px solid #9ca3af;
+            opacity: 0.85;
+        }
+
+        .card.leida h4,
+        .card.leida h3 {
+            color: #64748b;
+        }
+
+        .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .modal-body h4 {
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+
+        .modal-body p,
+        .modal-body strong {
+            color: #1f2937;
+        }
+
+        .modal-body .table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .modal-body .table thead th {
+            background: #e2e8f0;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .modal-body .table tbody td {
+            color: #111827;
+        }
+
+        .modal-footer {
+            border-top: none;
+        }
+        /* ==== FIN MODALS ==== */
+    </style>
+  </head>
+
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="dashboard.html"><i class="fas fa-graduation-cap"></i> Asesorías</a>
+
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="buscador.html">Busca asesorías AHORA <i class="fas fa-search"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">Menú <i class="fas fa-bars"></i></a>
+          </li>
+        
+<li class="nav-item">
+  <a class="nav-link" href="#" id="btn-logout">
+    Cerrar sesión
+  </a>
+</li>
+</ul>
+
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="container mt-4">
+      <div class="page-hero">
+        <div class="row align-items-center g-3">
+          <div class="col-md-8">
+            <h1 class="fw-bold mb-1">Centro de notificaciones</h1>
+            <p class="mb-0">Manténte al día con cambios, inscripciones y novedades en tus asesorías.</p>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <!-- id="badgeContador" para que el módulo actualice el número de nuevas -->
+            <span class="badge bg-light text-dark section-badge" id="badgeContador"><i class="fas fa-bell"></i> Cargando...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICACIONES NO LEIDAS - el módulo las genera dinámicamente -->
+    <div class="container mt-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title">Notificaciones nuevas</h2>
+        <span class="badge bg-primary section-badge">No leídas</span>
+      </div>
+      <!-- id="listaNotificacionesNoLeidas" para que el módulo inyecte las tarjetas -->
+      <div class="row g-3" id="listaNotificacionesNoLeidas">
+        <div class="text-center text-muted py-4">
+          <i class="fas fa-spinner fa-spin"></i> Cargando notificaciones...
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICACIONES YA LEIDAS -->
+    <div class="container mt-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title">Notificaciones anteriores</h2>
+        <span class="badge bg-secondary section-badge">Leídas</span>
+      </div>
+      <!-- id="listaNotificacionesLeidas" para las notificaciones ya leídas -->
+      <div class="row g-3" id="listaNotificacionesLeidas"></div>
+    </div>
+
+    <!-- MODALES DE NOTIFICACIONES PARA ASESOR -->
+    <div class="modal fade" id="modalAsesoriaCancelada_asesor" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+          <div class="modal-header">
+            <h4 class="modal-title">Detalles</h4>
+          </div>
+          <div class="modal-body">
+            <h4>🔴 ¡Asesoría cancelada!</h4>
+            <p><strong>Materia:</strong> Cálculo Integral</p>
+            <p><strong>Asesor:</strong> Juan Pérez</p>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Ubicación</th>
+                  <th>Modalidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>19/05/2026</td>
+                  <td>4:00 PM - 6:00 PM</td>
+                  <td>Edificio B, Aula 101</td>
+                  <td>Presencial</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal-footer d-flex">
+            <a href="registro_asesoria.html" class="btn btn-info">
+              Crear nueva asesoría
+            </a>
+            <button class="btn btn-danger" data-bs-dismiss="modal">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalAsesoriaCreada" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+          <div class="modal-header">
+            <h4 class="modal-title">Detalles</h4>
+          </div>
+          <div class="modal-body">
+            <h4>🟢 ¡Asesoría creada!</h4>
+            <p><strong>Materia:</strong> Álgebra Lineal</p>
+            <p><strong>Asesor:</strong> Juan Pérez</p>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Ubicación</th>
+                  <th>Modalidad</th>
+                  <th>Cupo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>12/10/2026</td>
+                  <td>1:00 PM - 3:00 PM</td>
+                  <td>Microsoft Teams</td>
+                  <td>Virtual</td>
+                  <td>10 cupos disponibles</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal-footer d-flex">
+            <a href="registro_asesoria.html" class="btn btn-info">
+              Crear nueva asesoría
+            </a>
+
+            <button class="btn btn-warning" data-bs-dismiss="modal" data-bs-target="#modal_cancelar_asesoria" data-bs-toggle="modal">
+              Cancelar asesoría
+            </button>
+
+            <button class="btn btn-danger" data-bs-dismiss="modal">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalCupoLleno" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+          <div class="modal-header">
+            <h4 class="modal-title">Detalles</h4>
+          </div>
+          <div class="modal-body">
+            <h4>🔵 ¡Cupo de asesoría lleno!</h4>
+            <p><strong>Materia:</strong> Programación Estructurada</p>
+            <p><strong>Asesor:</strong> Juan Pérez</p>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Ubicación</th>
+                  <th>Modalidad</th>
+                  <th>Cupo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>01/05/2026</td>
+                  <td>7:00 AM - 9:00 AM</td>
+                  <td>Microsoft Teams</td>
+                  <td>Virtual</td>
+                  <td>0 cupos disponibles</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal-footer d-flex">
+            <a href="registro_asesoria.html" class="btn btn-info">
+              Crear nueva asesoría
+            </a>
+
+            <button class="btn btn-danger" data-bs-dismiss="modal">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALES DE CONFIRMACIÓN -->
+    <div class="modal fade" id="modal_cancelar_asesoria" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content p-3">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-user-minus"></i> Cancelar asesoría
+            </h5>
+          </div>
+          <div class="modal-body">
+            <p>¿Deseas cancelar esta asesoría definitivamente?</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-warning text-white">Sí, cancelar asesoría</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modal_desinscribir_asesoria" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content p-3">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-user-minus"></i> Desinscribirse
+            </h5>
+          </div>
+          <div class="modal-body">
+            <p>¿Deseas cancelar tu asistencia a esta asesoría?</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-warning text-white">Sí, desinscribirme</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS v5.3.2 -->
+    <script 
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" 
+        crossorigin="anonymous">
+    </script>
+
+    <!-- Scripts del frontend - se cargan en orden: config → session → api → módulo -->
+    <script src="js/config.js"></script>
+    <script src="js/sessionManager.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <!-- notificacionesModule.js carga y muestra las notificaciones del backend -->
+    <script src="js/modules/notificacionesModule.js"></script>
+  </body>
+</html>
