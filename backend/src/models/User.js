@@ -27,6 +27,13 @@ const userSchema = new mongoose.Schema({
     ref: 'Asignatura'
   }],
 
+  // lista de asesores que el asesorado está siguiendo
+  // se actualiza cuando el asesorado hace clic en "seguir asesor"
+  asesores_seguidos: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
   // DOCUMENTO EMBEBIDO: Auditoría del sistema (Requisito de rúbrica).
   // Estos datos son exclusivos de la entidad, no se consultan de forma independiente
   // y su tamaño está acotado. Además, no afectan al front-end en lo absoluto.

@@ -1,5 +1,6 @@
 import Asesoria from '../models/Asesoria.js';
 import Inscripcion from '../models/Inscripcion.js';
+import User from '../models/User.js';
 import * as notificacionService from './notificaciones.service.js';
 
 // Función para crear una nueva asesoría
@@ -46,6 +47,25 @@ export const crearAsesoria = async (asesorId, data) => {
     `Has creado exitosamente la asesoría para la fecha ${new Date(horario).toLocaleString()}`,
     `/asesoria/${resultado._id}`
   );
+
+  // notificar a todos los asesorados que siguen a este asesor
+  try {
+    const seguidores = await User.find({
+      asesores_seguidos: asesorId,
+      tipo_usuario: 'asesorado'
+    }).select('_id');
+
+    for (const seguidor of seguidores) {
+      await notificacionService.crearNotificacion(
+        seguidor._id,
+        'nuevo asesor que sigues',
+        `${(await User.findById(asesorId)).nombre_usuario} ha creado una nueva asesoría. fecha: ${new Date(horario).toLocaleString()}`,
+        `/asesorias`
+      );
+    }
+  } catch (error) {
+    console.warn('error al notificar seguidores de nueva asesoría:', error);
+  }
 
   return resultado;
 };

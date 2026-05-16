@@ -253,6 +253,34 @@ window.verDetallesAsesoria = async (id) => {
           ? 'Los asesores no pueden inscribirse' : '';
       }
 
+      // configurar botón de seguimiento (solo para asesorados)
+      const btnSeguir = document.getElementById('btn-seguir-asesor');
+      if (btnSeguir) {
+        if (sessionManager.getUserType() === 'asesor') {
+          // los asesores no pueden seguir a otros asesores
+          btnSeguir.style.display = 'none';
+        } else {
+          // obtener lista de asesores seguidos para verificar si ya sigue
+          btnSeguir.style.display = 'block';
+          try {
+            const asesoresSeguidos = await apiManager.getAsesoresSeguidos();
+            const yaSigue = asesoresSeguidos.data?.some(a => a._id === as.asesorId?._id);
+            btnSeguir.textContent = yaSigue ? 'Dejar de seguir' : 'Seguir asesor';
+            btnSeguir.className = yaSigue ? 'btn btn-outline-secondary' : 'btn btn-secondary';
+            
+            // remover listeners antiguos y agregar uno nuevo
+            const newBtn = btnSeguir.cloneNode(true);
+            btnSeguir.parentNode.replaceChild(newBtn, btnSeguir);
+            document.getElementById('btn-seguir-asesor').addEventListener('click', async () => {
+              await manejarSeguimientoAsesor(as.asesorId?._id, yaSigue);
+            });
+          } catch (error) {
+            console.error('error al obtener asesores seguidos:', error);
+            btnSeguir.disabled = true;
+          }
+        }
+      }
+
       const myModal = new bootstrap.Modal(document.getElementById('modalDetalles'));
       myModal.show();
     }
@@ -305,5 +333,48 @@ function safeRedirect(url) {
   window._redirecting = true;
   window.location.href = url;
 }
+
+// maneja seguir o dejar de seguir a un asesor
+window.manejarSeguimientoAsesor = async (asesorId, yaSigue) => {
+  if (!asesorId) {
+    alert('no se puede seguir al asesor en este momento.');
+    return;
+  }
+
+  try {
+    if (yaSigue) {
+      // dejar de seguir
+      const respuesta = await apiManager.dejarDeSeguirAsesor(asesorId);
+      if (respuesta.success) {
+        alert('dejaste de seguir a este asesor.');
+        const btnSeguir = document.getElementById('btn-seguir-asesor');
+        if (btnSeguir) {
+          btnSeguir.textContent = 'Seguir asesor';
+          btnSeguir.className = 'btn btn-secondary';
+        }
+      }
+    } else {
+      // seguir
+      const respuesta = await apiManager.seguirAsesor(asesorId);
+      if (respuesta.success) {
+        alert('¡ahora sigues a este asesor! recibirás notificaciones de sus nuevas asesorías.');
+        const btnSeguir = document.getElementById('btn-seguir-asesor');
+        if (btnSeguir) {
+          btnSeguir.textContent = 'Dejar de seguir';
+          btnSeguir.className = 'btn btn-outline-secondary';
+        }
+      }
+    }
+  } catch (error) {
+    if (error.message === '400') {
+      alert('no puedes seguirte a ti mismo o hay un problema con el asesor.');
+    } else if (error.message === '403') {
+      alert('solo los asesorados pueden seguir asesores.');
+    } else {
+      alert('error al actualizar el seguimiento. intenta de nuevo.');
+    }
+    console.error('error en manejarSeguimientoAsesor:', error);
+  }
+};
 
 document.addEventListener('DOMContentLoaded', initBuscador);

@@ -126,6 +126,35 @@ class ApiManager {
     }
   }
 
+  // ==================== USUARIOS ====================
+
+  // devuelve datos completos del usuario con materias de interés pobladas
+  async getMe() {
+    return this.get(API_CONFIG.ENDPOINTS.USERS.ME);
+  }
+
+  // guarda arreglo de ids de materias de interés
+  async updateMateriasInteres(materiasIds) {
+    return this.patch(API_CONFIG.ENDPOINTS.USERS.MATERIAS_INTERES, {
+      materias_interes: materiasIds
+    });
+  }
+
+  // obtiene la lista de asesores que sigue el asesorado
+  async getAsesoresSeguidos() {
+    return this.get(API_CONFIG.ENDPOINTS.USERS.ASESORES_SEGUIDOS);
+  }
+
+  // el asesorado sigue a un asesor
+  async seguirAsesor(asesorId) {
+    return this.post(`${API_CONFIG.ENDPOINTS.USERS.SEGUIR}/${asesorId}`, {});
+  }
+
+  // el asesorado deja de seguir a un asesor
+  async dejarDeSeguirAsesor(asesorId) {
+    return this.delete(`${API_CONFIG.ENDPOINTS.USERS.SEGUIR}/${asesorId}`);
+  }
+
   // ==================== ASESORIAS ====================
 
   async getAsesorias(filters = {}) {

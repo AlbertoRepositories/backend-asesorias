@@ -48,6 +48,7 @@ async function initDashboard() {
     if (seccionAsesorado) seccionAsesorado.style.display = 'block';
     await cargarMisInscripciones();
     await cargarMateriasInteres();
+    await cargarAsesoresSeguidos();
     await cargarNotificacionesDashboard('seccion-asesorado');
   }
 }
@@ -290,11 +291,51 @@ async function cargarMateriasInteres(){
  cont.innerHTML=mats.data.map(m=>`<div class='form-check'><input class='form-check-input materia-check' type='checkbox' value='${m._id}' ${ids.includes(m._id)?'checked':''}><label class='form-check-label'>${m.nombre}</label></div>`).join('');
  document.getElementById('guardar-materias-btn')?.addEventListener('click',async()=>{
  const vals=[...document.querySelectorAll('.materia-check:checked')].map(c=>c.value);
- await apiManager.put('/auth/materias-interes',{materias_interes:vals});
+ await apiManager.updateMateriasInteres(vals);
  alert('Materias de interés guardadas');
  });
 }
 
+// carga los asesores que el asesorado está siguiendo
+// muestra sus nombres y calificación en el dashboard
+async function cargarAsesoresSeguidos() {
+  const contenedor = document.getElementById('asesores-seguidos-container');
+  if (!contenedor) return;
+
+  contenedor.innerHTML = '<p class="text-muted small"><i class="fas fa-spinner fa-spin"></i> Cargando asesores...</p>';
+
+  try {
+    const respuesta = await apiManager.getAsesoresSeguidos();
+    
+    if (respuesta.success && respuesta.data && respuesta.data.length > 0) {
+      const asesoresHTML = respuesta.data.map(asesor => {
+        const calificacion = asesor.calificacion 
+          ? `⭐ ${asesor.calificacion.toFixed(1)}` 
+          : 'Sin calificar';
+        return `
+          <div class="badge bg-info text-white me-2 mb-2 p-2">
+            ${asesor.nombre_usuario} ${calificacion}
+          </div>
+        `;
+      }).join('');
+      
+      contenedor.innerHTML = `
+        <div class="mb-2">
+          ${asesoresHTML}
+        </div>
+        <p class="text-muted small">sigues a ${respuesta.data.length} asesor${respuesta.data.length !== 1 ? 'es' : ''}</p>
+      `;
+    } else {
+      contenedor.innerHTML = `
+        <p class="text-muted small">aún no sigues a ningún asesor.</p>
+        <p class="text-muted small">dirígete al <a href="buscador.html" class="text-primary">buscador</a> para seguir asesores.</p>
+      `;
+    }
+  } catch (error) {
+    console.error('error al cargar asesores seguidos:', error);
+    contenedor.innerHTML = '<p class="text-muted small">error al cargar asesores seguidos.</p>';
+  }
+}
 
 // FIX modalidad y ubicación
 window.obtenerModalidadTexto = function(asesoria){
