@@ -212,12 +212,17 @@ async function cargarAsesorias(asesorId) {
         <div class="asesoria-icon">
           <i class="fas fa-chalkboard-teacher text-white" style="font-size:0.9rem;"></i>
         </div>
-        <div class="asesoria-text">
+        <div class="asesoria-text flex-grow-1">
           <strong>${nombreMateria}</strong><br>
           <span>
             <i class="fas fa-clock me-1" style="color:#2563eb;"></i>${fechaTexto}
           </span>
           ${a.cupo ? `<span class="badge bg-primary ms-2">${a.cupo} cupos</span>` : ''}
+        </div>
+        <div>
+          <button class="btn btn-sm btn-primary" onclick="verDetallesAsesoria('${a._id}')">
+            Ver detalles
+          </button>
         </div>
       `;
       listaEl.appendChild(div);

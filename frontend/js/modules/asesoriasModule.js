@@ -68,7 +68,7 @@ async function cargarDatosAsesoria(id) {
     if (respuesta.success) {
       const a = respuesta.data;
 
-      document.getElementById('selectAsignatura').value = a.asignaturaId;
+      document.getElementById('selectAsignatura').value = typeof a.asignaturaId === 'object' ? a.asignaturaId._id : a.asignaturaId;
       document.getElementById('descripcion').value      = a.descripcion;
 
       // Separar fecha y hora del horario (viene como ISO string)
@@ -81,6 +81,8 @@ async function cargarDatosAsesoria(id) {
       document.getElementById('horaFin').value = horaFin.toTimeString().substring(0, 5);
 
       document.getElementById('cupo').value = a.cupo;
+      if (a.modalidad) document.getElementById('modalidad').value = a.modalidad;
+      if (a.ubicacion) document.getElementById('ubicacion').value = a.ubicacion;
 
       // Cambiar etiquetas para modo edición
       const btnRegistrar     = document.getElementById('btnRegistrar');
@@ -104,6 +106,8 @@ async function enviarFormularioAsesoria(evento) {
   const horaInicio   = document.getElementById('horaInicio').value;
   const horaFin      = document.getElementById('horaFin').value;
   const cupo         = parseInt(document.getElementById('cupo').value);
+  const modalidad    = document.getElementById('modalidad').value;
+  const ubicacion    = document.getElementById('ubicacion').value.trim();
 
   // Validaciones del lado del cliente
   if (!asignaturaId) {
@@ -136,7 +140,7 @@ async function enviarFormularioAsesoria(evento) {
     return;
   }
 
-  const datosAsesoria = { asignaturaId, descripcion, horario: horarioISO, duracionMin, cupo };
+  const datosAsesoria = { asignaturaId, descripcion, horario: horarioISO, duracionMin, cupo, modalidad, ubicacion };
 
   try {
     let respuesta;

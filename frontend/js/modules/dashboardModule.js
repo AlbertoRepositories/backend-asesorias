@@ -90,7 +90,7 @@ async function cargarAsesoriasDelAsesor() {
         <tr id="fila-asesoria-${asesoria._id}">
           <td>${nombreMateria}</td>
           <td>${fecha}</td>
-          <td>—</td>
+          <td>${obtenerModalidadTexto(asesoria)}</td>
           <td>${asesoria.cupo}</td>
           <td><span class="badge ${estadoBadge}">${asesoria.estado}</span></td>
           <td>
