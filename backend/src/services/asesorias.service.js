@@ -58,7 +58,7 @@ export const crearAsesoria = async (asesorId, data) => {
     for (const seguidor of seguidores) {
       await notificacionService.crearNotificacion(
         seguidor._id,
-        'nuevo asesor que sigues',
+        'Un asesor que sigues...',
         `${(await User.findById(asesorId)).nombre_usuario} ha creado una nueva asesoría. fecha: ${new Date(horario).toLocaleString()}`,
         `/asesorias`
       );

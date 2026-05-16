@@ -1,9 +1,9 @@
-// Gestor centralizado de todas las peticiones HTTP
-// CORREGIDO: Token se guarda en localStorage y se envía en Authorization header
+// gestor centralizado de todas las peticiones HTTP al backend
+// el token JWT se guarda en localStorage y se envía en el header Authorization
 
 class ApiManager {
 
-  // Realiza una petición HTTP genérica
+  // realiza una petición HTTP genérica
   async request(endpoint, options = {}) {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
 
@@ -33,22 +33,18 @@ class ApiManager {
         throw new Error(response.status.toString());
       }
 
-      const data = await response.json();
-      return data;
+      return await response.json();
 
     } catch (error) {
-      // Si es un error que ya lanzamos (código HTTP)
       if (/^\d{3}$/.test(error.message)) {
         throw error;
       }
-
-      // Error de red
       console.error('Error en request:', error.message);
       throw new Error('NETWORK_ERROR');
     }
   }
 
-  // ==================== MÉTODOS HTTP ====================
+  // métodos HTTP
 
   get(endpoint) {
     return this.request(endpoint, { method: 'GET' });
@@ -79,7 +75,7 @@ class ApiManager {
     return this.request(endpoint, { method: 'DELETE' });
   }
 
-  // ==================== AUTENTICACION ====================
+  // autenticación
 
   async register(userData) {
     return this.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER, userData);
@@ -87,138 +83,126 @@ class ApiManager {
 
   async login(correo, contraseña) {
     const response = await this.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, { correo, contraseña });
-    
-    // NUEVO: Guardar el token en localStorage
+
     if (response.success && response.data.token) {
       localStorage.setItem(API_CONFIG.STORAGE_KEYS.TOKEN, response.data.token);
     }
-    
+
     return response;
   }
 
   async logout() {
-    // Limpiar token del localStorage
     localStorage.removeItem(API_CONFIG.STORAGE_KEYS.TOKEN);
-    
     return this.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {});
   }
 
-  // Verificar si la sesión es válida
+  // verifica si el token guardado sigue siendo válido en el backend
   async checkSession() {
     const token = localStorage.getItem(API_CONFIG.STORAGE_KEYS.TOKEN);
-    if (!token) {
-      return { valid: false, offline: false };
-    }
-    
+    if (!token) return { valid: false, offline: false };
+
     try {
-      const response = await this.get(API_CONFIG.ENDPOINTS.TEST.PRIVATE);
+      await this.get(API_CONFIG.ENDPOINTS.TEST.PRIVATE);
       return { valid: true, offline: false };
     } catch (error) {
       if (error.message === '401') {
-        // Token inválido o expirado
         localStorage.removeItem(API_CONFIG.STORAGE_KEYS.TOKEN);
         return { valid: false, offline: false };
-      }
-      if (error.message === 'NETWORK_ERROR') {
-        return { valid: true, offline: true };
       }
       return { valid: true, offline: true };
     }
   }
 
-  // ==================== USUARIOS ====================
+  // usuarios
 
-  // devuelve datos completos del usuario con materias de interés pobladas
+  // devuelve datos completos del usuario con materias de interés
   async getMe() {
-    return this.get(API_CONFIG.ENDPOINTS.USERS.ME);
+    return this.get('/auth/me');
   }
 
   // guarda arreglo de ids de materias de interés
   async updateMateriasInteres(materiasIds) {
-    return this.patch(API_CONFIG.ENDPOINTS.USERS.MATERIAS_INTERES, {
-      materias_interes: materiasIds
-    });
+    return this.patch('/users/materias-interes', { materias_interes: materiasIds });
   }
 
-  // obtiene la lista de asesores que sigue el asesorado
+  // devuelve arreglo vacío si el usuario es asesor (no tiene asesores seguidos)
   async getAsesoresSeguidos() {
-    return this.get(API_CONFIG.ENDPOINTS.USERS.ASESORES_SEGUIDOS);
+    if (sessionManager.getUserType() === 'asesor') {
+      return { success: true, data: [] };
+    }
+    return this.get('/users/asesores-seguidos');
   }
 
-  // el asesorado sigue a un asesor
+  // la URL incluye el asesorId directamente, no como variable separada
   async seguirAsesor(asesorId) {
-    return this.post(`${API_CONFIG.ENDPOINTS.USERS.SEGUIR}/${asesorId}`, {});
+    return this.post(`/users/seguir/${asesorId}`, {});
   }
 
-  // el asesorado deja de seguir a un asesor
   async dejarDeSeguirAsesor(asesorId) {
-    return this.delete(`${API_CONFIG.ENDPOINTS.USERS.SEGUIR}/${asesorId}`);
+    return this.delete(`/users/seguir/${asesorId}`);
   }
 
-  // ==================== ASESORIAS ====================
+  // asesorías:
 
   async getAsesorias(filters = {}) {
     const params = new URLSearchParams(filters).toString();
-    const endpoint = params
-      ? `${API_CONFIG.ENDPOINTS.ASESORIAS.LIST}?${params}`
-      : API_CONFIG.ENDPOINTS.ASESORIAS.LIST;
+    const endpoint = params ? `/asesorias?${params}` : '/asesorias';
     return this.get(endpoint);
   }
 
   async createAsesoria(datosAsesoria) {
-    return this.post(API_CONFIG.ENDPOINTS.ASESORIAS.CREATE, datosAsesoria);
+    return this.post('/asesorias', datosAsesoria);
   }
 
   async getMyAsesorias() {
     const user = sessionManager.getUser();
     if (!user) return { data: [] };
-    return this.get(`${API_CONFIG.ENDPOINTS.ASESORIAS.BY_ADVISOR}/${user._id}`);
+    return this.get(`/asesorias/asesor/${user._id}`);
   }
 
   async updateAsesoria(id, datos) {
-    return this.put(`${API_CONFIG.ENDPOINTS.ASESORIAS.UPDATE}/${id}`, datos);
+    return this.put(`/asesorias/${id}`, datos);
   }
 
   async deleteAsesoria(id) {
-    return this.delete(`${API_CONFIG.ENDPOINTS.ASESORIAS.DELETE}/${id}`);
+    return this.delete(`/asesorias/${id}`);
   }
 
-  // ==================== INSCRIPCIONES ====================
+  // inscripciones
 
   async enrollInAsesoria(asesoriaId) {
-    return this.post(API_CONFIG.ENDPOINTS.INSCRIPTIONS.CREATE, { asesoriaId });
+    return this.post('/inscripciones', { asesoriaId });
   }
 
   async cancelEnrollment(inscripcionId) {
-    const endpoint = API_CONFIG.ENDPOINTS.INSCRIPTIONS.DELETE.replace(':id', inscripcionId);
-    return this.delete(endpoint);
+    return this.delete(`/inscripciones/${inscripcionId}`);
   }
 
   async getMyEnrollments() {
-    return this.get(API_CONFIG.ENDPOINTS.INSCRIPTIONS.BY_USER);
+    return this.get('/inscripciones/mis-asesorias');
   }
 
-  // ==================== EVALUACIONES ====================
+  // evaluaciones
 
-  async evaluateAdvisor(evaluacionData) {
-    return this.post(API_CONFIG.ENDPOINTS.EVALUATIONS.CREATE, evaluacionData);
+  // los campos se llaman asesorId y asesoriaId (el backend los espera así)
+  async evaluateAdvisor({ asesorId, asesoriaId, calificacion, comentario }) {
+    return this.post('/evaluaciones', { asesorId, asesoriaId, calificacion, comentario });
   }
 
   async getAdvisorEvaluations(asesorId) {
-    return this.get(`${API_CONFIG.ENDPOINTS.EVALUATIONS.BY_ADVISOR}/${asesorId}`);
+    return this.get(`/evaluaciones/${asesorId}`);
   }
 
-  // ==================== NOTIFICACIONES ====================
+  // notificaciones
 
   async getNotifications() {
-    return this.get(API_CONFIG.ENDPOINTS.NOTIFICATIONS.LIST);
+    return this.get('/notificaciones');
   }
 
   async markNotificationAsRead(notificationId) {
-    const endpoint = API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_AS_READ.replace(':id', notificationId);
-    return this.patch(endpoint, {});
+    return this.patch(`/notificaciones/${notificationId}/leida`, {});
   }
 }
 
-// Instancia global
+// instancia global usada por todos los módulos
 const apiManager = new ApiManager();

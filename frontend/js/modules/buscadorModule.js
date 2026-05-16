@@ -23,9 +23,6 @@ async function initBuscador() {
     return;
   }
 
-  // se verifica la sesión en el backend SOLO si hay usuario en storage.
-
-  
   try {
     const sessionCheck = await apiManager.checkSession();
     if (!sessionCheck.valid) {
@@ -237,49 +234,28 @@ window.verDetallesAsesoria = async (id) => {
       document.getElementById('modal-ubicacion').textContent   = as.ubicacion || as.enlace || as.link || as.lugar || as.direccion || 'Por definir';
       document.getElementById('modal-modalidad').textContent   = as.modalidad || as.tipo_modalidad || as.tipoModalidad || 'Por definir';
       document.getElementById('modal-cupo-detalle').textContent = `${disponibles} cupos disponibles`;
+
       const btnPerfil = document.getElementById('btn-ver-perfil');
-      if(btnPerfil){ btnPerfil.href = `perfil_asesor.html?asesorId=${as.asesorId?._id || ''}&asesoriaId=${as._id}`; }
+      if (btnPerfil) {
+        btnPerfil.href = `perfil_asesor.html?asesorId=${as.asesorId?._id || ''}&asesoriaId=${as._id}`;
+      }
+
       const fin = new Date(horario.getTime() + ((as.duracionMin || 120) * 60000));
-      const finEl = document.getElementById('modal-hora-fin'); if(finEl){ finEl.textContent = fin.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});} 
+      const finEl = document.getElementById('modal-hora-fin');
+      if (finEl) finEl.textContent = fin.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
       const btnInscribir = document.getElementById('btn-confirmar-inscripcion');
       if (btnInscribir) {
         btnInscribir.setAttribute('onclick', `ejecutarInscripcion('${as._id}')`);
-        // Los asesores no se pueden inscribir
         const yaInscrito = as.yaInscrito;
         btnInscribir.disabled = sessionManager.getUserType() === 'asesor' || yaInscrito;
         btnInscribir.textContent = yaInscrito ? 'Ya inscrito' : 'Inscribirme';
-        btnInscribir.title    = sessionManager.getUserType() === 'asesor'
+        btnInscribir.title = sessionManager.getUserType() === 'asesor'
           ? 'Los asesores no pueden inscribirse' : '';
       }
 
-      // configurar botón de seguimiento (solo para asesorados)
-      const btnSeguir = document.getElementById('btn-seguir-asesor');
-      if (btnSeguir) {
-        if (sessionManager.getUserType() === 'asesor') {
-          // los asesores no pueden seguir a otros asesores
-          btnSeguir.style.display = 'none';
-        } else {
-          // obtener lista de asesores seguidos para verificar si ya sigue
-          btnSeguir.style.display = 'block';
-          try {
-            const asesoresSeguidos = await apiManager.getAsesoresSeguidos();
-            const yaSigue = asesoresSeguidos.data?.some(a => a._id === as.asesorId?._id);
-            btnSeguir.textContent = yaSigue ? 'Dejar de seguir' : 'Seguir asesor';
-            btnSeguir.className = yaSigue ? 'btn btn-outline-secondary' : 'btn btn-secondary';
-            
-            // remover listeners antiguos y agregar uno nuevo
-            const newBtn = btnSeguir.cloneNode(true);
-            btnSeguir.parentNode.replaceChild(newBtn, btnSeguir);
-            document.getElementById('btn-seguir-asesor').addEventListener('click', async () => {
-              await manejarSeguimientoAsesor(as.asesorId?._id, yaSigue);
-            });
-          } catch (error) {
-            console.error('error al obtener asesores seguidos:', error);
-            btnSeguir.disabled = true;
-          }
-        }
-      }
+      // se configura el botón de seguimiento
+      await configurarBotonSeguirModal(as.asesorId?._id);
 
       const myModal = new bootstrap.Modal(document.getElementById('modalDetalles'));
       myModal.show();
@@ -295,6 +271,84 @@ window.verDetallesAsesoria = async (id) => {
     console.error(error.message);
   }
 };
+
+/**
+ * se configura el botón "seguir asesor" dentro del modal de detalles
+ * se consulta si el usuario ya sigue al asesor y actualiza el botón en consecuencia
+ * el listener se registra UNA sola vez usando un flag en el botón (data-listener-set),
+ * y el estado actual siempre se lee desde data-siguiendo para evitar closures desactualizados
+ */
+async function configurarBotonSeguirModal(asesorId) {
+  const btnSeguir = document.getElementById('btn-seguir-asesor');
+  if (!btnSeguir) return;
+
+  // Ocultar el botón para asesores (ellos no siguen a otros asesores)
+  if (sessionManager.getUserType() === 'asesor') {
+    btnSeguir.style.display = 'none';
+    return;
+  }
+
+  btnSeguir.style.display = 'block';
+  btnSeguir.disabled = true;
+  btnSeguir.textContent = 'Cargando...';
+
+  // se guarda el asesorId en el botón para que el listener pueda acceder a él
+  btnSeguir.dataset.asesorId = asesorId || '';
+
+  try {
+    const respuesta = await apiManager.getAsesoresSeguidos();
+    const yaSigue = (respuesta.data || []).some(a => a._id === asesorId);
+    actualizarEstadoBotonSeguir(btnSeguir, yaSigue);
+  } catch (error) {
+    console.error('Error al verificar seguimiento:', error);
+    btnSeguir.textContent = 'Seguir asesor';
+    btnSeguir.className = 'btn btn-secondary';
+  } finally {
+    btnSeguir.disabled = false;
+  }
+
+  // se registra el listener solo una vez (evita acumulación de handlers al abrir el modal varias veces)
+  if (!btnSeguir.dataset.listenerSet) {
+    btnSeguir.dataset.listenerSet = 'true';
+    btnSeguir.addEventListener('click', async () => {
+      const currentAsesorId = btnSeguir.dataset.asesorId;
+      if (!currentAsesorId) return;
+
+      // se lee el estado actual desde el atributo
+      const siguiendoActual = btnSeguir.dataset.siguiendo === 'true';
+      btnSeguir.disabled = true;
+
+      try {
+        if (siguiendoActual) {
+          await apiManager.dejarDeSeguirAsesor(currentAsesorId);
+          actualizarEstadoBotonSeguir(btnSeguir, false);
+          alert('Has dejado de seguir a este asesor.');
+        } else {
+          await apiManager.seguirAsesor(currentAsesorId);
+          actualizarEstadoBotonSeguir(btnSeguir, true);
+          alert('¡Ahora sigues a este asesor! Recibirás notificaciones de sus nuevas asesorías.');
+        }
+      } catch (error) {
+        if (error.message === '400') {
+          alert('No puedes seguirte a ti mismo o hay un problema con el asesor.');
+        } else if (error.message === '403') {
+          alert('Solo los asesorados pueden seguir asesores.');
+        } else {
+          alert('No se pudo actualizar el seguimiento. Intenta de nuevo.');
+        }
+        console.error('Error en seguimiento:', error);
+      } finally {
+        btnSeguir.disabled = false;
+      }
+    });
+  }
+}
+
+function actualizarEstadoBotonSeguir(btn, yaSigue) {
+  btn.dataset.siguiendo = yaSigue.toString();
+  btn.textContent = yaSigue ? 'Dejar de seguir' : 'Seguir asesor';
+  btn.className = yaSigue ? 'btn btn-outline-secondary' : 'btn btn-secondary';
+}
 
 window.ejecutarInscripcion = async (asesoriaId) => {
   if (!sessionManager.isSessionActive()) {
@@ -333,48 +387,5 @@ function safeRedirect(url) {
   window._redirecting = true;
   window.location.href = url;
 }
-
-// maneja seguir o dejar de seguir a un asesor
-window.manejarSeguimientoAsesor = async (asesorId, yaSigue) => {
-  if (!asesorId) {
-    alert('no se puede seguir al asesor en este momento.');
-    return;
-  }
-
-  try {
-    if (yaSigue) {
-      // dejar de seguir
-      const respuesta = await apiManager.dejarDeSeguirAsesor(asesorId);
-      if (respuesta.success) {
-        alert('dejaste de seguir a este asesor.');
-        const btnSeguir = document.getElementById('btn-seguir-asesor');
-        if (btnSeguir) {
-          btnSeguir.textContent = 'Seguir asesor';
-          btnSeguir.className = 'btn btn-secondary';
-        }
-      }
-    } else {
-      // seguir
-      const respuesta = await apiManager.seguirAsesor(asesorId);
-      if (respuesta.success) {
-        alert('¡ahora sigues a este asesor! recibirás notificaciones de sus nuevas asesorías.');
-        const btnSeguir = document.getElementById('btn-seguir-asesor');
-        if (btnSeguir) {
-          btnSeguir.textContent = 'Dejar de seguir';
-          btnSeguir.className = 'btn btn-outline-secondary';
-        }
-      }
-    }
-  } catch (error) {
-    if (error.message === '400') {
-      alert('no puedes seguirte a ti mismo o hay un problema con el asesor.');
-    } else if (error.message === '403') {
-      alert('solo los asesorados pueden seguir asesores.');
-    } else {
-      alert('error al actualizar el seguimiento. intenta de nuevo.');
-    }
-    console.error('error en manejarSeguimientoAsesor:', error);
-  }
-};
 
 document.addEventListener('DOMContentLoaded', initBuscador);

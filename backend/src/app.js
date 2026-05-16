@@ -22,7 +22,7 @@ import { seedAsignaturas } from './utils/seed.js';
 // Importa el cron job para revisar asesorias sin inscritos
 import { initCron } from './utils/cron.js';
 
-// Importa rutas
+// importación de rutas
 import authRoutes from './routes/auth.routes.js';
 import testRoutes from './routes/test.routes.js';
 import evaluacionesRoutes from './routes/evaluaciones.routes.js';
@@ -30,6 +30,7 @@ import inscripcionesRoutes from './routes/inscripciones.routes.js';
 import notificacionesRoutes from './routes/notificaciones.routes.js';
 import asesoriasRoutes from './routes/asesorias.routes.js';
 import asignaturasRoutes from './routes/asignaturas.routes.js';
+import usersRoutes from './routes/users.routes.js';
 
 // Importa middleware global de errores
 import { errorHandler } from './middlewares/error.middleware.js';
@@ -53,35 +54,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ========== RUTAS API ==========
-
-// Ruta para pruebas
-app.use('/api/test', testRoutes);
-
-// Ruta para autenticacion (login, registro)
-app.use('/api/auth', authRoutes);
-
-// Ruta para evaluaciones de asesores
-app.use('/api/evaluaciones', evaluacionesRoutes);
-
-// Ruta para inscripciones a asesorias
-app.use('/api/inscripciones', inscripcionesRoutes);
-
-// Ruta para notificaciones
+app.use('/api/test',           testRoutes);
+app.use('/api/auth',           authRoutes);
+app.use('/api/evaluaciones',   evaluacionesRoutes);
+app.use('/api/inscripciones',  inscripcionesRoutes);
 app.use('/api/notificaciones', notificacionesRoutes);
-
-// Ruta para asesorias
-app.use('/api/asesorias', asesoriasRoutes);
-
-// Ruta para asignaturas (materias disponibles)
-app.use('/api/asignaturas', asignaturasRoutes);
+app.use('/api/asesorias',      asesoriasRoutes);
+app.use('/api/asignaturas',    asignaturasRoutes);
+app.use('/api/users',          usersRoutes);
 
 // ========== RUTA BASE ==========
-
 // Ruta de bienvenida para verificar que el servidor esta activo
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Servidor de Asesorias Voluntarias funcionando correctamente',
+    message: 'Servidor de Asesorías Voluntarias funcionando correctamente',
     version: '1.0.0'
   });
 });
